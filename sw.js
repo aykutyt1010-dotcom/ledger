@@ -2,7 +2,7 @@
  * Strateji: HTML/JS/CSS için ağ-öncelikli + önbellek yedeği,
  * ikonlar için önbellek-öncelikli. Sürüm değiştirince CACHE adı artırılır.
  */
-const CACHE = 'ledger-v3';
+const CACHE = 'ledger-v4';
 
 const CEKIRDEK = [
   './',
@@ -10,6 +10,7 @@ const CEKIRDEK = [
   './manifest.webmanifest',
   './db.js',
   './assets/ledger.css',
+  './assets/okunabilirlik.css',
   './assets/ledger-icons.js',
   './assets/iconify-icon.min.js',
   './ana-sayfa/ana-sayfa.html',

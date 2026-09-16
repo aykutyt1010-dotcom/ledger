@@ -1,0 +1,149 @@
+/* Ledger — Okunabilirlik katmanı v1 (kozmetik + büyük yazı)
+ * ledger.css SONRASINDA yüklenir, katmansız olduğu için Tailwind utilities'i ezer.
+ * Amaç: göz yormayan, iPhone'da tek bakışta okunan arayüz.
+ */
+
+/* 1) Taban puntoyu büyüt: 16px -> 18px (+%12.5). rem kullanan her şey büyür. */
+html {
+  font-size: 18px;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  line-height: 1.55;
+  letter-spacing: 0.005em;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 2) Soluk gri yazıları koyulaştır (kontrast). */
+:root {
+  --muted-foreground: #4b5563 !important;
+}
+
+/* 3) En küçük puntoları büyüt. */
+.text-xs {
+  font-size: 0.875rem !important; /* ~15.8px */
+  line-height: 1.5 !important;
+}
+.text-\[11px\] {
+  font-size: 0.8125rem !important; /* ~14.6px */
+  line-height: 1.5 !important;
+}
+.text-\[10px\] {
+  font-size: 0.75rem !important; /* ~13.5px */
+  line-height: 1.5 !important;
+  letter-spacing: 0.02em;
+}
+
+/* 4) Gövde yazılarını bir basamak büyüt. */
+.text-sm {
+  font-size: 1rem !important; /* ~18px */
+  line-height: 1.55 !important;
+}
+.text-base {
+  font-size: 1.125rem !important; /* ~20px */
+  line-height: 1.55 !important;
+}
+.text-lg {
+  font-size: 1.3125rem !important;
+  line-height: 1.4 !important;
+}
+
+/* 5) Başlıklar: biraz daha tok. */
+h1, h2, h3 {
+  letter-spacing: -0.01em;
+  line-height: 1.25 !important;
+}
+h1 {
+  font-size: 1.5rem !important; /* ~27px */
+}
+h3 {
+  font-size: 1.25rem !important;
+}
+
+/* 6) Etiketler (label) ve yardım yazıları okunsun. */
+label {
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+  color: #374151 !important;
+}
+input::placeholder,
+textarea::placeholder {
+  color: #6b7280 !important;
+  opacity: 1;
+  font-size: 0.9375rem !important;
+}
+
+/* 7) Form alanları: iOS otomatik zoom yapmasın (min 16px) + parmak dostu yükseklik. */
+input[type="text"],
+input[type="search"],
+input[type="number"],
+input[type="date"],
+input[type="tel"],
+textarea,
+select {
+  font-size: 1rem !important; /* 18px */
+  line-height: 1.5 !important;
+  min-height: 2.9rem;
+}
+input[type="date"] {
+  min-height: 3.1rem;
+}
+
+/* 8) Butonlar: yazı + dokunma alanı büyüsün. */
+button {
+  min-height: 2.6rem;
+}
+button.text-xs,
+a.text-xs {
+  font-size: 0.875rem !important;
+}
+
+/* Hızlı tutar çipleri (+100, +250...) */
+div.flex.gap-2.text-xs > button {
+  font-size: 0.875rem !important;
+  padding: 0.55rem 0.8rem !important;
+  font-weight: 600;
+}
+
+/* 9) Müşteri / bakiye kartlarındaki isim + tutar vurgusu. */
+.font-semibold {
+  letter-spacing: 0.005em;
+}
+/* Tutar alanları biraz daha iri */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+}
+
+/* 10) Rozet / bilgi çipleri (Borçlu, Tahsil edildi...) */
+.rounded-full.px-2,
+.rounded-full.px-2\.5 {
+  font-size: 0.8125rem !important;
+  padding-top: 0.3rem !important;
+  padding-bottom: 0.3rem !important;
+  font-weight: 600 !important;
+}
+
+/* 11) Modal başlık + açıklama */
+#yeniKisiModal h3,
+#duzenleModal h3 {
+  font-size: 1.3rem !important;
+}
+
+/* 12) Arama kutusu metni */
+#searchInput {
+  font-size: 1rem !important;
+}
+
+/* 13) Küçük ekranlarda kart iç boşluğu nefes alsın */
+@media (max-width: 480px) {
+  main {
+    padding-left: 1.1rem !important;
+    padding-right: 1.1rem !important;
+  }
+  section.rounded-2xl {
+    padding: 1.4rem !important;
+  }
+}
