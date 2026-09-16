@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Ledger" />
+    <meta name="theme-color" content="#263B73" />
+    <link rel="manifest" href="../manifest.webmanifest" />
+    <link rel="icon" type="image/png" sizes="192x192" href="../icons/icon-192.png" />
+    <link rel="apple-touch-icon" href="../icons/apple-touch-icon.png" />
+    <title>Ledger - Bakiyeler</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@100;200;300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;200;300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://code.iconify.design/iconify-icon/3.0.0/iconify-icon.min.js"></script>
+    <style type="text/tailwindcss">
+      @theme inline {
+        --color-background: var(--background);
+        --color-foreground: var(--foreground);
+        --color-primary: var(--primary);
+        --color-primary-foreground: var(--primary-foreground);
+        --color-secondary: var(--secondary);
+        --color-secondary-foreground: var(--secondary-foreground);
+        --color-muted: var(--muted);
+        --color-muted-foreground: var(--muted-foreground);
+        --color-accent: var(--accent);
+        --color-accent-foreground: var(--accent-foreground);
+        --color-destructive: var(--destructive);
+        --color-card: var(--card);
+        --color-card-foreground: var(--card-foreground);
+        --color-border: var(--border);
+        --color-input: var(--input);
+        --color-ring: var(--ring);
+        --color-chart-1: var(--chart-1);
+        --color-chart-2: var(--chart-2);
+        --color-chart-3: var(--chart-3);
+        --color-chart-4: var(--chart-4);
+        --color-chart-5: var(--chart-5);
+
+        --font-sans: "DM Sans";
+        --font-heading: "DM Sans";
+        --font-mono: "JetBrains Mono";
+      }
+
+      :root {
+        --background: #F7F8FA;
+        --foreground: #172033;
+        --primary: #263B73;
+        --primary-foreground: #FFFFFF;
+        --secondary: #E8EDF7;
+        --secondary-foreground: #263B73;
+        --muted: #E8EBF0;
+        --muted-foreground: #667085;
+        --accent: #DDF6EF;
+        --accent-foreground: #087F68;
+        --destructive: #E4573D;
+        --card: #FFFFFF;
+        --card-foreground: #172033;
+        --border: #E3E7EE;
+        --input: #F1F3F6;
+        --ring: #526DB5;
+        --chart-1: #263B73;
+        --chart-2: #11A683;
+        --chart-3: #E4573D;
+        --chart-4: #F2B84B;
+        --chart-5: #7B61A8;
+
+        --font-sans: "DM Sans";
+        --font-heading: "DM Sans";
+        --font-mono: "JetBrains Mono";
+      }
+
+      iconify-icon:not([width]):not([height]) {
+        display: inline-block;
+        width: 1em;
+        height: 1em;
+      }
+    </style>
+    <script src="../db.js"></script>
+  </head>
+  <body>
+    <div class="min-h-screen bg-background text-foreground pb-12">
+      <main class="mx-auto w-full max-w-md px-4 pt-6 sm:px-5">
+        <!-- Header -->
+        <header class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <button
+              onclick="location.href='../ana-sayfa/ana-sayfa.html'"
+              class="flex size-9 items-center justify-center rounded-full bg-card shadow-sm ring-1 ring-border text-foreground hover:bg-black/5 transition active:scale-95"
+              aria-label="Ana Sayfa"
+            >
+              <iconify-icon icon="solar:alt-arrow-left-linear" width="20" height="20"></iconify-icon>
+            </button>
+            <div>
+              <p id="toplamKisiSayisi" class="text-xs font-medium text-muted-foreground">0 Kişi Kayıtlı</p>
+              <h1 class="font-heading mt-0.5 text-xl font-bold tracking-tight">Müşteri Bakiyeleri</h1>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <!-- Tüm Verileri Temizleme / Sıfırlama Butonu -->
+            <button
+              onclick="handleTumunuSifirla()"
+              class="flex size-9 items-center justify-center rounded-xl bg-card shadow-sm ring-1 ring-border text-muted-foreground hover:text-destructive hover:bg-destructive/10 active:scale-95 transition"
+              title="Tüm Müşteri ve Kayıtları Sıfırla (Temiz Başlangıç)"
+            >
+              <iconify-icon icon="solar:trash-bin-trash-linear" width="18" height="18"></iconify-icon>
+            </button>
+            <!-- Yeni Kişi Ekle Butonu -->
+            <button
+              onclick="openYeniKisiModal()"
+              class="flex items-center gap-1.5 rounded-xl bg-primary px-3.5 py-2 text-xs font-semibold text-primary-foreground shadow-sm hover:opacity-95 transition active:scale-95"
+            >
+              <iconify-icon icon="solar:user-plus-linear" width="16" height="16"></iconify-icon>
+              <span>Yeni Kişi</span>
+            </button>
+          </div>
+        </header>
+
+        <!-- Canlı Arama -->
+        <div class="relative mt-4">
+          <iconify-icon
+            icon="solar:magnifer-linear"
+            class="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+            width="18"
+            height="18"
+          ></iconify-icon>
+          <input
+            type="search"
+            id="searchInput"
+            oninput="renderMusteriler()"
+            placeholder="İsim ile hızlı ara..."
+            class="w-full rounded-xl bg-input py-2.5 pl-10 pr-4 text-sm font-medium placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20"
+          />
+        </div>
+
+        <!-- Müşteri Bakiye Kartları Listesi -->
+        <section id="bakiyelerContainer" class="mt-4 space-y-2.5">
+          <!-- JS ile dinamik dolacak -->
+        </section>
+      </main>
+    </div>
+
+    <!-- 1. YENİ KİŞİ / BAKİYE EKLE MODALI -->
+    <div id="yeniKisiModal" class="hidden fixed inset-0 z-50 flex items-end justify-center bg-foreground/40 backdrop-blur-sm sm:items-center">
+      <div class="w-full max-w-md rounded-t-3xl bg-background p-6 shadow-2xl sm:rounded-3xl">
+        <div class="mb-5 flex items-center justify-between">
+          <div>
+            <h3 class="font-heading text-xl font-bold">Yeni Kişi Ekle</h3>
+            <p class="text-xs text-muted-foreground mt-0.5">Kişi bilgisi ve varsa açılış bakiyesi</p>
+          </div>
+          <button onclick="closeYeniKisiModal()" class="flex size-8 items-center justify-center rounded-full bg-input text-muted-foreground hover:bg-black/5 transition">
+            <iconify-icon icon="solar:close-circle-linear" width="20" height="20"></iconify-icon>
+          </button>
+        </div>
+        <form onsubmit="handleYeniKisiKaydet(event)" class="space-y-4">
+          <div>
+            <label class="mb-1.5 block text-xs font-semibold text-muted-foreground">Kişi / Müşteri Adı Soyadı</label>
+            <input
+              type="text"
+              id="yeniKisiAd"
+              required
+              class="w-full rounded-xl bg-card py-3 px-4 text-sm font-semibold shadow-sm ring-1 ring-border focus:outline-none focus:ring-2 focus:ring-primary/20"
+              placeholder="Örn: Ahmet Yılmaz"
+            />
+          </div>
+          <div>
+            <label class="mb-1.5 block text-xs font-semibold text-muted-foreground">Açılış Borcu / Hizmet Tutarı (TL) <span class="font-normal text-muted-foreground/80">(İsteğe Bağlı)</span></label>
+            <div class="relative">
+              <span class="absolute left-3.5 top-1/2 -translate-y-1/2 font-bold text-muted-foreground">₺</span>
+              <input
+                type="number"
+                id="yeniKisiTutar"
+                step="0.01"
+                min="0"
+                placeholder="0.00"
+                inputmode="decimal"
+                class="w-full rounded-xl bg-card py-2.5 pl-8 pr-4 text-base font-bold tabular-nums shadow-sm ring-1 ring-border focus:outline-none focus:ring-2 focus:ring-primary/20"
+              />
+            </div>
+            <p class="text-[11px] text-muted-foreground mt-1">Geçmişten gelen bir borç varsa hemen açılış bakiyesi olarak kaydedilir.</p>
+          </div>
+          <div>
+            <label class="mb-1.5 block text-xs font-semibold text-muted-foreground">Açıklama</label>
+            <input
+              type="text"
+              id="yeniKisiAciklama"
+              placeholder="Örn: Devir bakiyesi veya açılış borcu"
+              class="w-full rounded-xl bg-card py-2.5 px-4 text-xs font-medium shadow-sm ring-1 ring-border focus:outline-none focus:ring-2 focus:ring-primary/20"
+            />
+          </div>
+          <button
+            type="submit"
+            class="w-full rounded-xl bg-primary py-3.5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/20 active:scale-[.99] transition-all"
+          >
+            Kişiyi Kaydet
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- 2. KİŞİ DÜZENLE / SİL MODALI -->
+    <div id="duzenleModal" class="hidden fixed inset-0 z-50 flex items-end justify-center bg-foreground/40 backdrop-blur-sm sm:items-center">
+      <div class="w-full max-w-md rounded-t-3xl bg-background p-6 shadow-2xl sm:rounded-3xl">
+        <div class="mb-4 flex items-center justify-between">
+          <div>
+            <h3 class="font-heading text-xl font-bold">Kişiyi Düzenle</h3>
+            <p id="duzenleMevcutBakiye" class="text-xs text-muted-foreground mt-0.5">Mevcut Bakiye: ₺0,00</p>
+          </div>
+          <button onclick="closeDuzenleModal()" class="flex size-8 items-center justify-center rounded-full bg-input text-muted-foreground hover:bg-black/5 transition">
+            <iconify-icon icon="solar:close-circle-linear" width="20" height="20"></iconify-icon>
+          </button>
+        </div>
+        <form onsubmit="handleMusteriGuncelle(event)" class="space-y-4">
+          <input type="hidden" id="duzenleMusteriId" value="" />
+          <div>
+            <label class="mb-1.5 block text-xs font-semibold text-muted-foreground">Kişi / Müşteri Adı Soyadı</label>
+            <input
+              type="text"
+              id="duzenleMusteriAd"
+              required
+              class="w-full rounded-xl bg-card py-3 px-4 text-sm font-semibold shadow-sm ring-1 ring-border focus:outline-none focus:ring-2 focus:ring-primary/20"
+            />
+          </div>
+          
+          <button
+            type="submit"
+            class="w-full rounded-xl bg-primary py-3 text-sm font-semibold text-primary-foreground shadow-sm active:scale-[.99] transition-all"
+          >
+            Değişiklikleri Kaydet
+          </button>
+
+          <div class="border-t border-border pt-3 mt-4">
+            <button
+              type="button"
+              onclick="handleMusteriSil()"
+              class="w-full flex items-center justify-center gap-1.5 rounded-xl bg-destructive/10 py-3 text-xs font-semibold text-destructive hover:bg-destructive/20 active:scale-[.99] transition-all"
+            >
+              <iconify-icon icon="solar:trash-bin-trash-linear" width="16" height="16"></iconify-icon>
+              <span>Kişiyi ve Tüm Kayıtlarını Sil</span>
+            </button>
+            <p class="text-[11px] text-center text-muted-foreground mt-1.5">Bu işlem müşteriye ait tüm hareket kayıtlarını kalıcı olarak siler.</p>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      let allMusteriler = [];
+
+      async function loadBakiyeler() {
+        allMusteriler = await getMusteriBakiyeleri();
+        document.getElementById('toplamKisiSayisi').innerText = `${allMusteriler.length} Kişi Kayıtlı`;
+        renderMusteriler();
+      }
+
+      function renderMusteriler() {
+        const query = document.getElementById('searchInput').value.toLowerCase().trim();
+        let filtered = allMusteriler.filter(m => m.ad.toLowerCase().includes(query));
+
+        const container = document.getElementById('bakiyelerContainer');
+        container.innerHTML = '';
+
+        if (filtered.length === 0) {
+          container.innerHTML = `
+            <div class="py-12 px-5 text-center bg-card rounded-2xl ring-1 ring-border shadow-sm">
+              <div class="flex size-14 mx-auto items-center justify-center rounded-2xl bg-secondary text-primary mb-3.5">
+                <iconify-icon icon="solar:users-group-rounded-linear" width="28" height="28"></iconify-icon>
+              </div>
+              <p class="text-base font-bold text-foreground">Kayıtlı Kişi Bulunmuyor</p>
+              <p class="text-xs text-muted-foreground mt-1 max-w-xs mx-auto">Tüm eski kayıtlar temizlendi. Aşağıdaki butona dokunarak ilk müşterinizi ekleyebilirsiniz.</p>
+              <button onclick="openYeniKisiModal()" class="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2.5 text-xs font-semibold text-primary-foreground shadow-md shadow-primary/20 active:scale-95 transition-all">
+                <iconify-icon icon="solar:user-plus-linear" width="16" height="16"></iconify-icon>
+                <span>+ İlk Kişiyi Ekle</span>
+              </button>
+            </div>
+          `;
+          return;
+        }
+
+        filtered.forEach(m => {
+          const isAlacakli = m.netBakiyeKurus < 0;
+          const isSifir = m.netBakiyeKurus === 0;
+          const barColor = isAlacakli ? 'bg-chart-2' : (isSifir ? 'bg-muted-foreground/30' : 'bg-chart-3');
+          const avatarBgColor = isAlacakli ? 'bg-accent' : (isSifir ? 'bg-input' : 'bg-[#FCE8E4]');
+          const avatarTextColor = isAlacakli ? 'text-accent-foreground' : (isSifir ? 'text-muted-foreground' : 'text-chart-3');
+          const amountColor = isAlacakli ? 'text-chart-2' : (isSifir ? 'text-muted-foreground' : 'text-chart-3');
+          const durumText = isAlacakli ? 'Alacaklı' : (isSifir ? 'Bakiye Sıfır' : 'Borçlu');
+
+          // Ödeme Durumu Metni ve Rengi (xx aydır ödeme alınmadı vb.)
+          const odemeDurumu = m.odemeDurumu || { text: 'Henüz ödeme yok', status: 'neutral', icon: 'solar:clock-circle-linear' };
+          let odemeTextColor = 'text-muted-foreground';
+          if (odemeDurumu.status === 'danger') {
+            odemeTextColor = 'text-chart-3 font-semibold';
+          } else if (odemeDurumu.status === 'warning') {
+            odemeTextColor = 'text-[#A66B00] font-semibold';
+          } else if (odemeDurumu.status === 'success') {
+            odemeTextColor = 'text-chart-2 font-medium';
+          }
+
+          const card = document.createElement('div');
+          card.className = 'group cursor-pointer flex items-center justify-between rounded-2xl bg-card p-3.5 sm:p-4 shadow-sm ring-1 ring-border hover:bg-black/5 active:scale-[.99] transition-all';
+          card.onclick = () => {
+            location.href = `../raporlar/raporlar.html?musteriId=${m.id}`;
+          };
+
+          card.innerHTML = `
+            <div class="flex items-center gap-3 min-w-0 flex-1">
+              <span class="h-10 w-1.5 rounded-full ${barColor} shrink-0"></span>
+              <div class="flex size-11 shrink-0 items-center justify-center rounded-full ${avatarBgColor} font-bold text-sm ${avatarTextColor}">
+                ${getInitials(m.ad)}
+              </div>
+              <div class="min-w-0 flex-1">
+                <p class="truncate text-sm sm:text-base font-semibold text-foreground">${m.ad}</p>
+                <p class="text-xs ${odemeTextColor} mt-0.5 flex items-center gap-1">
+                  <iconify-icon icon="${odemeDurumu.icon}" width="14" height="14" class="shrink-0"></iconify-icon>
+                  <span class="truncate">${odemeDurumu.text}</span>
+                </p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 shrink-0 text-right pl-3">
+              <div>
+                <p class="font-heading text-base font-bold tabular-nums ${amountColor}">
+                  ${formatCurrency(Math.abs(m.netBakiyeKurus))}
+                </p>
+                <p class="text-[11px] font-medium text-muted-foreground mt-0.5">${durumText}</p>
+              </div>
+              <!-- Düzenle / Düzelt Butonu -->
+              <button
+                type="button"
+                onclick="event.stopPropagation(); openDuzenleModal(${m.id})"
+                class="flex size-8 items-center justify-center rounded-lg bg-input text-muted-foreground hover:text-foreground hover:bg-black/10 active:scale-95 transition ml-1"
+                title="Kişiyi Düzenle veya Sil"
+              >
+                <iconify-icon icon="solar:pen-new-square-linear" width="16" height="16"></iconify-icon>
+              </button>
+              <iconify-icon icon="solar:alt-arrow-right-linear" class="text-muted-foreground/60 hidden sm:inline" width="18" height="18"></iconify-icon>
+            </div>
+          `;
+
+          container.appendChild(card);
+        });
+      }
+
+      // Yeni Kişi Modal Fonksiyonları
+      function openYeniKisiModal() {
+        document.getElementById('yeniKisiAd').value = '';
+        document.getElementById('yeniKisiTutar').value = '';
+        document.getElementById('yeniKisiAciklama').value = '';
+        document.getElementById('yeniKisiModal').classList.remove('hidden');
+        setTimeout(() => document.getElementById('yeniKisiAd').focus(), 60);
+      }
+
+      function closeYeniKisiModal() {
+        document.getElementById('yeniKisiModal').classList.add('hidden');
+      }
+
+      async function handleYeniKisiKaydet(e) {
+        e.preventDefault();
+        const ad = document.getElementById('yeniKisiAd').value.trim();
+        const tutarStr = document.getElementById('yeniKisiTutar').value;
+        const aciklama = document.getElementById('yeniKisiAciklama').value.trim() || 'Açılış bakiyesi';
+
+        if (!ad) return alert('Lütfen kişi adı girin.');
+
+        const musteriId = await musteriEkle(ad, '');
+
+        // Eğer başlangıç borcu girilmişse, otomatik hizmet işlemi olarak kaydet
+        if (tutarStr && parseFloat(tutarStr) > 0) {
+          const tutarTL = parseFloat(tutarStr);
+          await islemEkle(musteriId, 'hizmet', tutarTL, aciklama);
+        }
+
+        closeYeniKisiModal();
+        await loadBakiyeler();
+      }
+
+      // Düzenle / Sil Modal Fonksiyonları
+      let aktifDuzenlenenMusteri = null;
+
+      function openDuzenleModal(musteriId) {
+        aktifDuzenlenenMusteri = allMusteriler.find(x => x.id === musteriId);
+        if (!aktifDuzenlenenMusteri) return;
+
+        document.getElementById('duzenleMusteriId').value = aktifDuzenlenenMusteri.id;
+        document.getElementById('duzenleMusteriAd').value = aktifDuzenlenenMusteri.ad;
+        
+        const bakiyeStr = formatCurrency(Math.abs(aktifDuzenlenenMusteri.netBakiyeKurus));
+        const durum = aktifDuzenlenenMusteri.netBakiyeKurus > 0 ? '(Borçlu)' : (aktifDuzenlenenMusteri.netBakiyeKurus < 0 ? '(Alacaklı)' : '(Sıfır)');
+        document.getElementById('duzenleMevcutBakiye').innerText = `Mevcut Bakiye: ${bakiyeStr} ${durum}`;
+
+        document.getElementById('duzenleModal').classList.remove('hidden');
+        setTimeout(() => document.getElementById('duzenleMusteriAd').focus(), 60);
+      }
+
+      function closeDuzenleModal() {
+        document.getElementById('duzenleModal').classList.add('hidden');
+        aktifDuzenlenenMusteri = null;
+      }
+
+      async function handleMusteriGuncelle(e) {
+        e.preventDefault();
+        const id = parseInt(document.getElementById('duzenleMusteriId').value);
+        const yeniAd = document.getElementById('duzenleMusteriAd').value.trim();
+
+        if (!id || !yeniAd) return alert('Geçerli bir isim girin.');
+
+        await musteriGuncelle(id, yeniAd);
+        closeDuzenleModal();
+        await loadBakiyeler();
+      }
+
+      async function handleMusteriSil() {
+        if (!aktifDuzenlenenMusteri) return;
+
+        const onay = confirm(`"${aktifDuzenlenenMusteri.ad}" kişisini ve bu kişiye ait TÜM borç/ödeme kayıtlarını kalıcı olarak silmek istediğinizden emin misiniz?\n\nBu işlem geri alınamaz!`);
+        if (!onay) return;
+
+        await musteriSil(aktifDuzenlenenMusteri.id);
+        closeDuzenleModal();
+        await loadBakiyeler();
+      }
+
+      async function handleTumunuSifirla() {
+        const onay = confirm("DİKKAT: Sistemdeki TÜM müşteriler ve TÜM işlem kayıtları tamamen silinecektir.\n\nSıfırdan temiz bir defterle başlamak istediğinizden emin misiniz?");
+        if (!onay) return;
+
+        await tumVerileriTemizle();
+        await loadBakiyeler();
+      }
+
+      document.addEventListener('DOMContentLoaded', loadBakiyeler);
+    </script>
+      <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('../sw.js', { scope: '../' }).catch((e) => console.warn('SW kaydı atlandı:', e));
+        });
+      }
+    </script>
+  </body>
+</html>

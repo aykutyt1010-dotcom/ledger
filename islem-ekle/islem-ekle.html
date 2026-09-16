@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Ledger" />
+    <meta name="theme-color" content="#263B73" />
+    <link rel="manifest" href="../manifest.webmanifest" />
+    <link rel="icon" type="image/png" sizes="192x192" href="../icons/icon-192.png" />
+    <link rel="apple-touch-icon" href="../icons/apple-touch-icon.png" />
+    <title>Ledger - İşlem Ekle</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@100;200;300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;200;300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://code.iconify.design/iconify-icon/3.0.0/iconify-icon.min.js"></script>
+    <style type="text/tailwindcss">
+      @theme inline {
+        --color-background: var(--background);
+        --color-foreground: var(--foreground);
+        --color-primary: var(--primary);
+        --color-primary-foreground: var(--primary-foreground);
+        --color-secondary: var(--secondary);
+        --color-secondary-foreground: var(--secondary-foreground);
+        --color-muted: var(--muted);
+        --color-muted-foreground: var(--muted-foreground);
+        --color-accent: var(--accent);
+        --color-accent-foreground: var(--accent-foreground);
+        --color-destructive: var(--destructive);
+        --color-card: var(--card);
+        --color-card-foreground: var(--card-foreground);
+        --color-popover: var(--popover);
+        --color-popover-foreground: var(--popover-foreground);
+        --color-border: var(--border);
+        --color-input: var(--input);
+        --color-ring: var(--ring);
+        --color-chart-1: var(--chart-1);
+        --color-chart-2: var(--chart-2);
+        --color-chart-3: var(--chart-3);
+        --color-chart-4: var(--chart-4);
+        --color-chart-5: var(--chart-5);
+
+        --font-font-sans: var(--font-sans);
+        --font-font-heading: var(--font-heading);
+        --font-font-serif: var(--font-serif);
+        --font-font-mono: var(--font-mono);
+      }
+
+      @theme {
+        --radius-xs: calc(var(--radius) - 8px);
+        --radius-sm: calc(var(--radius) - 4px);
+        --radius-md: calc(var(--radius) - 2px);
+        --radius-lg: var(--radius);
+        --radius-xl: calc(var(--radius) + 4px);
+        --radius-2xl: calc(var(--radius) + 8px);
+        --radius-3xl: calc(var(--radius) + 16px);
+        --radius-4xl: calc(var(--radius) + 24px);
+      }
+
+      * {
+        corner-shape: var(--shape, round);
+      }
+
+      .rounded-full, .rounded-none,
+      .rounded-t-full, .rounded-t-none,
+      .rounded-r-full, .rounded-r-none,
+      .rounded-b-full, .rounded-b-none,
+      .rounded-l-full, .rounded-l-none,
+      .rounded-s-full, .rounded-s-none,
+      .rounded-e-full, .rounded-e-none,
+      .rounded-tl-full, .rounded-tl-none,
+      .rounded-tr-full, .rounded-tr-none,
+      .rounded-bl-full, .rounded-bl-none,
+      .rounded-br-full, .rounded-br-none,
+      .rounded-ss-full, .rounded-ss-none,
+      .rounded-se-full, .rounded-se-none,
+      .rounded-es-full, .rounded-es-none,
+      .rounded-ee-full, .rounded-ee-none {
+        corner-shape: round;
+      }
+
+      @utility rounded-* {
+        border-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-t-* {
+        border-top-left-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+        border-top-right-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-r-* {
+        border-top-right-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+        border-bottom-right-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-b-* {
+        border-bottom-right-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+        border-bottom-left-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-l-* {
+        border-top-left-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+        border-bottom-left-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-tl-* {
+        border-top-left-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-tr-* {
+        border-top-right-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-bl-* {
+        border-bottom-left-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-br-* {
+        border-bottom-right-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-s-* {
+        border-start-start-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+        border-end-start-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-e-* {
+        border-start-end-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+        border-end-end-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-ss-* {
+        border-start-start-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-se-* {
+        border-start-end-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-es-* {
+        border-end-start-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-ee-* {
+        border-end-end-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+
+      :root {
+        --shape: squircle;
+        --shape-multiplier: 1;
+
+          --background: #F7F8FA;
+        --foreground: #172033;
+        --primary: #263B73;
+        --primary-foreground: #FFFFFF;
+        --secondary: #E8EDF7;
+        --secondary-foreground: #263B73;
+        --muted: #E8EBF0;
+        --muted-foreground: #667085;
+        --accent: #DDF6EF;
+        --accent-foreground: #087F68;
+        --destructive: #E4573D;
+        --card: #FFFFFF;
+        --card-foreground: #172033;
+        --popover: #FFFFFF;
+        --popover-foreground: #172033;
+        --border: #E3E7EE;
+        --input: #F1F3F6;
+        --ring: #526DB5;
+        --chart-1: #263B73;
+        --chart-2: #11A683;
+        --chart-3: #E4573D;
+        --chart-4: #F2B84B;
+        --chart-5: #7B61A8;
+
+        --font-sans: "DM Sans";
+        --font-heading: "DM Sans";
+        --font-serif: "Playfair Display";
+        --font-mono: "JetBrains Mono";
+
+        --radius: 0.875rem;
+      }
+
+      @supports (corner-shape: squircle) {
+        :root {
+          --shape-multiplier: 2.5;
+        }
+      }
+
+      /* Prevent layout shift for icons without explicit dimensions */
+      iconify-icon:not([width]):not([height]) {
+        display: inline-block;
+        width: 1em;
+        height: 1em;
+      }
+
+      /* Hide scrollbars */
+      *,
+      *::before,
+      *::after {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+      *::-webkit-scrollbar {
+        display: none;
+      }
+    </style>
+    <script src="../db.js"></script>
+  </head>
+  <body>
+    <div class="min-h-screen bg-background text-foreground pb-10">
+      <main class="mx-auto w-full max-w-md px-5 pt-7">
+        <header class="flex items-center justify-between">
+          <h1 class="font-heading text-2xl font-semibold tracking-tight">İşlem Kaydı</h1>
+          <button
+            onclick="location.href='../ana-sayfa/ana-sayfa.html'"
+            class="flex size-9 items-center justify-center rounded-full bg-input text-muted-foreground"
+          >
+            <iconify-icon icon="solar:close-circle-linear" width="20" height="20"></iconify-icon>
+          </button>
+        </header>
+        <div class="mt-5 grid grid-cols-2 rounded-xl bg-input p-1">
+          <button
+            id="btnTipHizmet"
+            onclick="setTip('hizmet')"
+            class="rounded-lg bg-card py-2.5 text-xs font-semibold text-chart-3 shadow-sm ring-1 ring-border/50"
+          >
+            Borç / Hizmet Ekle</button
+          ><button
+            id="btnTipOdeme"
+            onclick="setTip('odeme')" 
+            class="rounded-lg py-2.5 text-xs font-semibold text-muted-foreground">
+            Ödeme Al
+          </button>
+        </div>
+        <form onsubmit="handleKaydet(event)" id="islemForm" class="mt-6 space-y-4">
+          <div>
+            <label class="mb-1.5 block text-xs font-semibold text-muted-foreground">Müşteri Seçin</label>
+            <div class="relative">
+              <select id="musteriSecici" required class="w-full appearance-none rounded-xl bg-card py-3 pl-4 pr-10 text-sm font-semibold shadow-sm ring-1 ring-border focus:outline-none focus:ring-2 focus:ring-primary/20">
+                 <option value="">Yükleniyor...</option>
+              </select>
+              <iconify-icon
+                icon="solar:alt-arrow-down-linear"
+                class="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+                width="20"
+                height="20"
+              ></iconify-icon>
+            </div>
+          </div>
+          <div>
+            <label class="mb-1.5 block text-xs font-semibold text-muted-foreground">Tutar (TL)</label>
+            <div class="relative">
+              <span
+                class="absolute left-4 top-1/2 -translate-y-1/2 text-lg font-bold text-muted-foreground"
+                >₺</span
+              ><input
+                type="number"
+                id="islemTutar"
+                step="0.01"
+                min="0.01"
+                required
+                placeholder="0.00"
+                inputmode="decimal"
+                class="w-full rounded-xl bg-card py-3.5 pl-9 pr-4 text-xl font-bold tabular-nums text-foreground shadow-sm ring-1 ring-border focus:outline-none focus:ring-2 focus:ring-primary/20"
+              />
+            </div>
+          </div>
+          <div class="flex gap-2 text-xs font-medium">
+            <button type="button" onclick="ekleTutar(100)" class="rounded-lg bg-input px-3 py-1.5 text-foreground">+₺100</button>
+            <button type="button" onclick="ekleTutar(250)" class="rounded-lg bg-input px-3 py-1.5 text-foreground">+₺250</button>
+            <button type="button" onclick="ekleTutar(500)" class="rounded-lg bg-input px-3 py-1.5 text-foreground">+₺500</button>
+            <button type="button" onclick="ekleTutar(1000)" class="rounded-lg bg-input px-3 py-1.5 text-foreground">+₺1.000</button>
+          </div>
+          <div>
+            <label class="mb-1.5 block text-xs font-semibold text-muted-foreground">Açıklama / Ürün - Hizmet Adı</label>
+            <input
+              type="text"
+              id="islemAciklama"
+              placeholder="Örn: 2 Adet Motor Yağı Değişimi"
+              class="w-full rounded-xl bg-card py-3 px-4 text-sm font-medium shadow-sm ring-1 ring-border focus:outline-none focus:ring-2 focus:ring-primary/20"
+            />
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div class="col-span-2">
+              <label class="mb-1.5 block text-xs font-semibold text-muted-foreground">İşlem Tarihi</label>
+              <div class="relative">
+                <input
+                  type="date"
+                  id="islemTarihi"
+                  required
+                  class="w-full rounded-xl bg-card py-3 px-3 text-xs font-semibold shadow-sm ring-1 ring-border focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+            </div>
+          </div>
+          <div class="rounded-xl bg-card p-4 shadow-sm ring-1 ring-border">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <iconify-icon
+                  icon="solar:bell-bing-linear"
+                  class="text-primary"
+                  width="20"
+                  height="20"
+                ></iconify-icon
+                ><span class="text-xs font-semibold">SMS / WhatsApp ile Hatırlat</span>
+              </div>
+              <span class="relative inline-flex h-5 w-9 cursor-pointer rounded-full bg-primary"
+                ><span
+                  class="inline-block size-4 translate-x-4 rounded-full bg-white transition"
+                ></span
+              ></span>
+            </div>
+          </div>
+          <button
+            type="submit"
+            class="w-full rounded-xl bg-primary py-3.5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/20 active:scale-[.99]"
+          >
+            İşlemi Kaydet
+          </button>
+        </form>
+      </main>
+    </div>
+    <script>
+      let islemTipi = 'hizmet';
+      
+      function setTip(tip) {
+        islemTipi = tip;
+        const btnHizmet = document.getElementById('btnTipHizmet');
+        const btnOdeme = document.getElementById('btnTipOdeme');
+        
+        if(tip === 'hizmet') {
+          btnHizmet.className = 'rounded-lg bg-card py-2.5 text-xs font-semibold text-chart-3 shadow-sm ring-1 ring-border/50 transition-colors';
+          btnOdeme.className = 'rounded-lg py-2.5 text-xs font-semibold text-muted-foreground transition-colors';
+        } else {
+          btnOdeme.className = 'rounded-lg bg-card py-2.5 text-xs font-semibold text-chart-2 shadow-sm ring-1 ring-border/50 transition-colors';
+          btnHizmet.className = 'rounded-lg py-2.5 text-xs font-semibold text-muted-foreground transition-colors';
+        }
+      }
+
+      function ekleTutar(miktar) {
+        const input = document.getElementById('islemTutar');
+        let current = parseFloat(input.value) || 0;
+        input.value = (current + miktar).toFixed(2);
+      }
+
+      async function initForm() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const seciliTip = urlParams.get('tip') || 'hizmet';
+        const musteriId = urlParams.get('musteriId');
+        
+        setTip(seciliTip);
+
+        // Date init
+        document.getElementById('islemTarihi').value = new Date().toISOString().split('T')[0];
+
+        // Müşterileri doldur
+        const secici = document.getElementById('musteriSecici');
+        try {
+          const musteriler = await getMusteriler();
+          secici.innerHTML = '<option value="" disabled selected>Müşteri Seçin</option>';
+          musteriler.forEach(m => {
+            const option = document.createElement('option');
+            option.value = m.id;
+            option.textContent = m.ad + (m.telefon ? ' (' + m.telefon + ')' : '');
+            if(musteriId && m.id == musteriId) {
+              option.selected = true;
+            }
+            secici.appendChild(option);
+          });
+        } catch(err) {
+          console.error("Müşteri listesi alınamadı:", err);
+          secici.innerHTML = '<option value="" disabled>Müşteriler yüklenemedi</option>';
+        }
+      }
+
+      async function handleKaydet(e) {
+        e.preventDefault();
+        
+        const musteriId = parseInt(document.getElementById('musteriSecici').value);
+        if(!musteriId) return alert('Lütfen müşteri seçin.');
+
+        const tutarTL = parseFloat(document.getElementById('islemTutar').value);
+        if(isNaN(tutarTL) || tutarTL <= 0) return alert('Geçerli bir tutar girin.');
+
+        const aciklama = document.getElementById('islemAciklama').value || (islemTipi === 'odeme' ? 'Tahsilat' : 'Hizmet Bedeli');
+        const tarih = document.getElementById('islemTarihi').value;
+
+        await islemEkle(musteriId, islemTipi, tutarTL, aciklama, tarih);
+        
+        alert('İşlem başarıyla kaydedildi!');
+        window.history.back(); // Önceki sayfaya dön
+      }
+
+      document.addEventListener('DOMContentLoaded', initForm);
+    </script>
+      <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('../sw.js', { scope: '../' }).catch((e) => console.warn('SW kaydı atlandı:', e));
+        });
+      }
+    </script>
+  </body>
+</html>

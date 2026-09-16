@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Ledger" />
+    <meta name="theme-color" content="#263B73" />
+    <link rel="manifest" href="../manifest.webmanifest" />
+    <link rel="icon" type="image/png" sizes="192x192" href="../icons/icon-192.png" />
+    <link rel="apple-touch-icon" href="../icons/apple-touch-icon.png" />
+    <title>Ledger - Ana Sayfa</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@100;200;300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;200;300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://code.iconify.design/iconify-icon/3.0.0/iconify-icon.min.js"></script>
+    <style type="text/tailwindcss">
+      @theme inline {
+        --color-background: var(--background);
+        --color-foreground: var(--foreground);
+        --color-primary: var(--primary);
+        --color-primary-foreground: var(--primary-foreground);
+        --color-secondary: var(--secondary);
+        --color-secondary-foreground: var(--secondary-foreground);
+        --color-muted: var(--muted);
+        --color-muted-foreground: var(--muted-foreground);
+        --color-accent: var(--accent);
+        --color-accent-foreground: var(--accent-foreground);
+        --color-destructive: var(--destructive);
+        --color-card: var(--card);
+        --color-card-foreground: var(--card-foreground);
+        --color-popover: var(--popover);
+        --color-popover-foreground: var(--popover-foreground);
+        --color-border: var(--border);
+        --color-input: var(--input);
+        --color-ring: var(--ring);
+        --color-chart-1: var(--chart-1);
+        --color-chart-2: var(--chart-2);
+        --color-chart-3: var(--chart-3);
+        --color-chart-4: var(--chart-4);
+        --color-chart-5: var(--chart-5);
+
+        --font-font-sans: var(--font-sans);
+        --font-font-heading: var(--font-heading);
+        --font-font-serif: var(--font-serif);
+        --font-font-mono: var(--font-mono);
+      }
+
+      @theme {
+        --radius-xs: calc(var(--radius) - 8px);
+        --radius-sm: calc(var(--radius) - 4px);
+        --radius-md: calc(var(--radius) - 2px);
+        --radius-lg: var(--radius);
+        --radius-xl: calc(var(--radius) + 4px);
+        --radius-2xl: calc(var(--radius) + 8px);
+        --radius-3xl: calc(var(--radius) + 16px);
+        --radius-4xl: calc(var(--radius) + 24px);
+      }
+
+      * {
+        corner-shape: var(--shape, round);
+      }
+
+      .rounded-full, .rounded-none,
+      .rounded-t-full, .rounded-t-none,
+      .rounded-r-full, .rounded-r-none,
+      .rounded-b-full, .rounded-b-none,
+      .rounded-l-full, .rounded-l-none,
+      .rounded-s-full, .rounded-s-none,
+      .rounded-e-full, .rounded-e-none,
+      .rounded-tl-full, .rounded-tl-none,
+      .rounded-tr-full, .rounded-tr-none,
+      .rounded-bl-full, .rounded-bl-none,
+      .rounded-br-full, .rounded-br-none,
+      .rounded-ss-full, .rounded-ss-none,
+      .rounded-se-full, .rounded-se-none,
+      .rounded-es-full, .rounded-es-none,
+      .rounded-ee-full, .rounded-ee-none {
+        corner-shape: round;
+      }
+
+      @utility rounded-* {
+        border-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-t-* {
+        border-top-left-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+        border-top-right-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-r-* {
+        border-top-right-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+        border-bottom-right-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-b-* {
+        border-bottom-right-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+        border-bottom-left-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-l-* {
+        border-top-left-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+        border-bottom-left-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-tl-* {
+        border-top-left-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-tr-* {
+        border-top-right-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-bl-* {
+        border-bottom-left-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-br-* {
+        border-bottom-right-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-s-* {
+        border-start-start-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+        border-end-start-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-e-* {
+        border-start-end-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+        border-end-end-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-ss-* {
+        border-start-start-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-se-* {
+        border-start-end-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-es-* {
+        border-end-start-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-ee-* {
+        border-end-end-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+
+      :root {
+        --shape: squircle;
+        --shape-multiplier: 1;
+
+          --background: #F7F8FA;
+        --foreground: #172033;
+        --primary: #263B73;
+        --primary-foreground: #FFFFFF;
+        --secondary: #E8EDF7;
+        --secondary-foreground: #263B73;
+        --muted: #E8EBF0;
+        --muted-foreground: #667085;
+        --accent: #DDF6EF;
+        --accent-foreground: #087F68;
+        --destructive: #E4573D;
+        --card: #FFFFFF;
+        --card-foreground: #172033;
+        --popover: #FFFFFF;
+        --popover-foreground: #172033;
+        --border: #E3E7EE;
+        --input: #F1F3F6;
+        --ring: #526DB5;
+        --chart-1: #263B73;
+        --chart-2: #11A683;
+        --chart-3: #E4573D;
+        --chart-4: #F2B84B;
+        --chart-5: #7B61A8;
+
+        --font-sans: "DM Sans";
+        --font-heading: "DM Sans";
+        --font-serif: "Playfair Display";
+        --font-mono: "JetBrains Mono";
+
+        --radius: 0.875rem;
+      }
+
+      @supports (corner-shape: squircle) {
+        :root {
+          --shape-multiplier: 2.5;
+        }
+      }
+
+      /* Prevent layout shift for icons without explicit dimensions */
+      iconify-icon:not([width]):not([height]) {
+        display: inline-block;
+        width: 1em;
+        height: 1em;
+      }
+
+      /* Hide scrollbars */
+      *,
+      *::before,
+      *::after {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+      *::-webkit-scrollbar {
+        display: none;
+      }
+    </style>
+    <script src="../db.js"></script>
+  </head>
+  <body>
+    <div class="min-h-screen bg-background text-foreground pb-10">
+      <main class="mx-auto w-full max-w-md px-5 pt-7">
+        <header class="flex items-start justify-between">
+          <div>
+            <p id="tarihHeader" class="text-sm font-medium text-muted-foreground">Bugün</p>
+            <h1 class="font-heading mt-1 text-2xl font-semibold tracking-tight">İşletme Özeti</h1>
+          </div>
+          <button
+            class="relative mt-1 flex size-11 items-center justify-center rounded-full bg-card shadow-sm ring-1 ring-border"
+            aria-label="Bildirimler"
+            onclick="exportData()"
+          >
+            <iconify-icon
+              icon="solar:bell-linear"
+              class="text-foreground"
+              width="20"
+              height="20"
+            ></iconify-icon
+            ><span
+              class="absolute right-2 top-2 size-2 rounded-full bg-chart-3 ring-2 ring-card"
+            ></span>
+          </button>
+        </header>
+        <section
+          class="mt-7 rounded-2xl bg-primary p-6 text-primary-foreground shadow-xl shadow-primary/20 cursor-pointer active:scale-[.99] transition-transform group"
+          onclick="location.href='../raporlar/raporlar.html'"
+          title="Raporlar ve ayrıntılı hareketler için tıklayın"
+        >
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-1.5">
+              <span class="text-sm font-medium text-primary-foreground/75">Genel Bakiye</span>
+              <iconify-icon icon="solar:alt-arrow-right-linear" width="16" height="16" class="text-primary-foreground/60 group-hover:translate-x-1 transition-transform"></iconify-icon>
+            </div>
+            <button id="btnGizleGoster" onclick="event.stopPropagation(); toggleBakiye()" class="flex items-center gap-1 text-xs font-medium rounded-lg bg-white/10 px-2.5 py-1 text-primary-foreground hover:bg-white/20 transition">
+              <iconify-icon icon="solar:eye-linear" width="16" height="16"></iconify-icon> Gizle
+            </button>
+          </div>
+          <div class="mt-4 flex items-baseline justify-between">
+            <p id="genelBakiyeEl" class="font-heading text-4xl sm:text-5xl font-extrabold tracking-tight tabular-nums">
+              ₺0,00
+            </p>
+            <span class="text-xs font-medium text-primary-foreground/80 flex items-center gap-1 rounded-full bg-white/10 px-3 py-1">
+              Raporlar <iconify-icon icon="solar:arrow-right-linear" width="14" height="14"></iconify-icon>
+            </span>
+          </div>
+        </section>
+
+        <!-- Tek Satır Büyütülmüş Bakiyeler Butonu -->
+        <section class="mt-5">
+          <button
+            onclick="location.href='../bakiyeler/bakiyeler.html'"
+            class="flex w-full items-center justify-between rounded-2xl bg-card p-4 text-foreground shadow-sm ring-1 ring-border hover:bg-black/5 active:scale-[.99] transition-all"
+          >
+            <div class="flex items-center gap-3.5">
+              <span class="flex size-12 shrink-0 items-center justify-center rounded-xl bg-accent text-accent-foreground">
+                <iconify-icon icon="solar:wallet-money-linear" width="26" height="26"></iconify-icon>
+              </span>
+              <div class="text-left">
+                <p class="font-heading text-base font-semibold">Müşteri Bakiyeleri</p>
+                <p class="text-xs text-muted-foreground mt-0.5">Kişi bazlı hesap dökümleri ve borç takibi</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-1 text-xs font-semibold text-primary shrink-0 pl-2">
+              <span>Bakiyeleri Gör</span>
+              <iconify-icon icon="solar:alt-arrow-right-linear" width="18" height="18"></iconify-icon>
+            </div>
+          </button>
+        </section>
+
+        <!-- Son İşlemler -->
+        <section class="mt-8">
+          <div class="mb-3 flex items-center justify-between">
+            <h2 class="font-heading text-lg font-semibold">Son işlemler</h2>
+            <button onclick="location.href='../raporlar/raporlar.html'" class="text-sm font-semibold text-primary">Tümünü gör</button>
+          </div>
+          <div id="sonIslemlerListesi" class="rounded-xl bg-card px-4 shadow-sm ring-1 ring-border">
+            <!-- JS ile dinamik dolacak -->
+          </div>
+        </section>
+      </main>
+    </div>
+    <script>
+      let bakiyeGizli = false;
+      function toggleBakiye() {
+        bakiyeGizli = !bakiyeGizli;
+        const bakiyeEl = document.getElementById('genelBakiyeEl');
+        if (bakiyeEl) bakiyeEl.innerText = bakiyeGizli ? "₺****" : formatCurrency(window.currentGenelBakiyeKurus || 0);
+        
+        const icon = document.querySelector('#btnGizleGoster iconify-icon');
+        if (icon) icon.setAttribute('icon', bakiyeGizli ? 'solar:eye-closed-linear' : 'solar:eye-linear');
+        const btn = document.querySelector('#btnGizleGoster');
+        if (btn) btn.innerHTML = (icon ? icon.outerHTML : '') + (bakiyeGizli ? ' Göster' : ' Gizle');
+      }
+
+      async function loadDashboard() {
+        // Set Date
+        document.getElementById('tarihHeader').innerText = "Bugün, " + new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long' }).format(new Date());
+
+        // Gen Ozet
+        const ozet = await getGenelOzet();
+        window.currentGenelBakiyeKurus = ozet.genelBakiyeKurus;
+        if(!bakiyeGizli) {
+          const bakiyeEl = document.getElementById('genelBakiyeEl');
+          if (bakiyeEl) bakiyeEl.innerText = formatCurrency(ozet.genelBakiyeKurus);
+        }
+
+        // Müşteriler ve Son İşlemler
+        const musteriler = await getMusteriler();
+        const gecerliIdler = new Set(musteriler.map(m => parseInt(m.id)));
+        let hareketler = await getHareketler();
+        hareketler = hareketler.filter(h => gecerliIdler.has(parseInt(h.musteriId)));
+        hareketler = hareketler.sort((a,b) => new Date(b.tarih) - new Date(a.tarih)).slice(0, 5);
+        const islemListEl = document.getElementById('sonIslemlerListesi');
+        islemListEl.innerHTML = '';
+        if(hareketler.length === 0) {
+          islemListEl.innerHTML = '<p class="text-xs text-muted-foreground py-6 text-center font-medium">Son işlem bulunmuyor.</p>';
+          return;
+        }
+
+        for(let i=0; i<hareketler.length; i++) {
+          const h = hareketler[i];
+          const m = musteriler.find(x => parseInt(x.id) === parseInt(h.musteriId)) || {ad: 'Bilinmeyen'};
+          const isOdeme = h.tip === 'odeme';
+          const icon = isOdeme ? 'mdi:arrow-down-left' : 'mdi:arrow-up-right';
+          const bgIconColor = isOdeme ? 'bg-accent text-accent-foreground' : 'bg-[#FCE8E4] text-chart-3';
+          const amountColor = isOdeme ? 'text-chart-2' : 'text-chart-3';
+          const sign = isOdeme ? '+' : '-';
+          const borderCls = (i !== hareketler.length -1) ? 'border-b border-border' : '';
+
+          islemListEl.innerHTML += `
+              <div onclick="location.href='../raporlar/raporlar.html?musteriId=${h.musteriId}'" class="flex items-center gap-3 py-3.5 ${borderCls} cursor-pointer hover:opacity-80 active:scale-[.99] transition">
+                <span class="flex size-9 items-center justify-center rounded-full ${bgIconColor} shrink-0">
+                  <iconify-icon icon="${icon}" width="20" height="20"></iconify-icon>
+                </span>
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-medium truncate">${m.ad} · ${isOdeme ? 'Tahsilat' : 'Hizmet / Borç'}</p>
+                  <p class="text-xs text-muted-foreground">${formatRelativeDate(h.tarih)}</p>
+                </div>
+                <p class="font-semibold tabular-nums ${amountColor} shrink-0">${sign}₺${formatNumberTR(h.tutarKurus)}</p>
+              </div>
+          `;
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', loadDashboard);
+    </script>
+      <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('../sw.js', { scope: '../' }).catch((e) => console.warn('SW kaydı atlandı:', e));
+        });
+      }
+    </script>
+  </body>
+</html>
