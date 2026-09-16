@@ -2,7 +2,7 @@
  * Strateji: HTML/JS/CSS için ağ-öncelikli + önbellek yedeği,
  * ikonlar için önbellek-öncelikli. Sürüm değiştirince CACHE adı artırılır.
  */
-const CACHE = 'ledger-v2';
+const CACHE = 'ledger-v3';
 
 const CEKIRDEK = [
   './',
@@ -10,6 +10,7 @@ const CEKIRDEK = [
   './manifest.webmanifest',
   './db.js',
   './assets/ledger.css',
+  './assets/ledger-icons.js',
   './assets/iconify-icon.min.js',
   './ana-sayfa/ana-sayfa.html',
   './bakiyeler/bakiyeler.html',
@@ -59,15 +60,25 @@ self.addEventListener('fetch', (event) => {
   }
 
   // Kendi dosyalarımız: önce ağı dene, olmazsa önbellek.
+  // NOT: ?musteriId=5 gibi sorgulu sayfa geçişleri çevrimdışıyken
+  // önbellekle birebir eşleşmez; o yüzden ignoreSearch yedeği var.
   if (url.origin === self.location.origin) {
     event.respondWith(
       fetch(istek)
         .then((yanit) => {
-          const kopya = yanit.clone();
-          caches.open(CACHE).then((cache) => cache.put(istek, kopya));
+          if (yanit && yanit.ok) {
+            const kopya = yanit.clone();
+            caches.open(CACHE).then((cache) => cache.put(istek, kopya));
+          }
           return yanit;
         })
-        .catch(() => caches.match(istek).then((eslesme) => eslesme || caches.match('./index.html')))
+        .catch(() =>
+          caches.match(istek).then(
+            (eslesme) =>
+              eslesme ||
+              caches.match(istek, { ignoreSearch: true }).then((e2) => e2 || caches.match('./index.html'))
+          )
+        )
     );
   }
 });
