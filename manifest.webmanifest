@@ -2,15 +2,20 @@
   "name": "Ledger — Veresiye Defteri",
   "short_name": "Ledger",
   "description": "Kişisel cari hesap ve veresiye defteri. Çevrimdışı çalışır, veriler cihazda saklanır.",
-  "id": "./",
+  "id": "/ledger/",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
   "lang": "tr",
   "dir": "ltr",
-  "background_color": "#F7F8FA",
-  "theme_color": "#263B73",
+  "background_color": "#F8FAFC",
+  "theme_color": "#1E293B",
+  "categories": [
+    "finance",
+    "business",
+    "productivity"
+  ],
   "icons": [
     {
       "src": "./icons/icon-192.png",
@@ -29,6 +34,11 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    },
+    {
+      "src": "./icons/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
     }
   ]
 }

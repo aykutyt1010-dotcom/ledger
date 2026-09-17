@@ -1,23 +1,18 @@
-/* Ledger — Service Worker (çevrimdışı çalışma)
- * Strateji: HTML/JS/CSS için ağ-öncelikli + önbellek yedeği,
- * ikonlar için önbellek-öncelikli. Sürüm değiştirince CACHE adı artırılır.
+/**
+ * Ledger — Service Worker (assets/sw.js)
+ * %100 Çevrimdışı Çalışma, Stale-While-Revalidate Stratejisi
  */
-const CACHE = 'ledger-v4';
 
-const CEKIRDEK = [
+const CACHE_NAME = 'ledger-spa-v1';
+
+const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './manifest.webmanifest',
   './db.js',
-  './assets/ledger.css',
-  './assets/okunabilirlik.css',
-  './assets/ledger-icons.js',
-  './assets/iconify-icon.min.js',
-  './ana-sayfa/ana-sayfa.html',
-  './bakiyeler/bakiyeler.html',
-  './musteriler/musteriler.html',
-  './raporlar/raporlar.html',
-  './islem-ekle/islem-ekle.html',
+  './assets/app.css',
+  './assets/app.js',
+  './assets/icons.js',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/maskable-512.png',
@@ -26,60 +21,54 @@ const CEKIRDEK = [
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE).then((cache) => cache.addAll(CEKIRDEK)).then(() => self.skipWaiting())
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(ASSETS_TO_CACHE);
+    }).then(() => self.skipWaiting())
   );
 });
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys()
-      .then((adlar) => Promise.all(adlar.filter((a) => a !== CACHE).map((a) => caches.delete(a))))
-      .then(() => self.clients.claim())
+    caches.keys().then((keys) => {
+      return Promise.all(
+        keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
+      );
+    }).then(() => self.clients.claim())
   );
 });
 
 self.addEventListener('fetch', (event) => {
-  const istek = event.request;
-  if (istek.method !== 'GET') return;
+  const request = event.request;
+  if (request.method !== 'GET') return;
 
-  const url = new URL(istek.url);
+  const url = new URL(request.url);
 
-  // CDN (tailwind/iconify/font) isteklerini önbelleğe al, çevrimdışıyken yedekten ver.
-  const cdnMi = /cdn\.jsdelivr\.net|code\.iconify\.design|fonts\.googleapis\.com|fonts\.gstatic\.com/.test(url.hostname);
-  if (cdnMi) {
-    event.respondWith(
-      caches.open(CACHE).then((cache) =>
-        fetch(istek)
-          .then((yanit) => {
-            if (yanit && yanit.ok) cache.put(istek, yanit.clone());
-            return yanit;
-          })
-          .catch(() => cache.match(istek))
-      )
-    );
-    return;
-  }
-
-  // Kendi dosyalarımız: önce ağı dene, olmazsa önbellek.
-  // NOT: ?musteriId=5 gibi sorgulu sayfa geçişleri çevrimdışıyken
-  // önbellekle birebir eşleşmez; o yüzden ignoreSearch yedeği var.
+  // Kendi origin'imiz: Stale-While-Revalidate
   if (url.origin === self.location.origin) {
     event.respondWith(
-      fetch(istek)
-        .then((yanit) => {
-          if (yanit && yanit.ok) {
-            const kopya = yanit.clone();
-            caches.open(CACHE).then((cache) => cache.put(istek, kopya));
+      caches.open(CACHE_NAME).then(async (cache) => {
+        // Query parametrelerini yoksay (index.html?tab=... aynı index.html önbelleğini kullanmalı)
+        let cacheKey = request;
+        if (request.mode === 'navigate') {
+          cacheKey = './index.html';
+        }
+
+        const cachedResponse = await cache.match(cacheKey);
+
+        const fetchPromise = fetch(request).then((networkResponse) => {
+          if (networkResponse && networkResponse.ok) {
+            cache.put(cacheKey, networkResponse.clone());
           }
-          return yanit;
-        })
-        .catch(() =>
-          caches.match(istek).then(
-            (eslesme) =>
-              eslesme ||
-              caches.match(istek, { ignoreSearch: true }).then((e2) => e2 || caches.match('./index.html'))
-          )
-        )
+          return networkResponse;
+        }).catch(() => {
+          // Ağ yoksa ve navigasyon ise index.html döndür
+          if (request.mode === 'navigate') {
+            return cache.match('./index.html');
+          }
+        });
+
+        return cachedResponse || fetchPromise;
+      })
     );
   }
 });

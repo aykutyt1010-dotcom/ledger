@@ -1,29 +1,458 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="Ledger">
-    <meta name="theme-color" content="#263B73" />
-    <link rel="manifest" href="./manifest.webmanifest" />
-    <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png" />
-    <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
-    <meta http-equiv="refresh" content="0; url=ana-sayfa/ana-sayfa.html">
-    <script>
-      window.location.replace("ana-sayfa/ana-sayfa.html");
-    </script>
-    <title>Ledger</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Ledger" />
+  <meta name="format-detection" content="telephone=no" />
+  <meta name="theme-color" content="#1E293B" />
+  
+  <title>Ledger — Kişisel Veresiye Defteri</title>
+  
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
+  
+  <link rel="stylesheet" href="./assets/app.css" />
+  
+  <script src="./assets/icons.js"></script>
+  <script src="./db.js"></script>
+  <script src="./assets/app.js" defer></script>
 </head>
-<body style="margin:0; background:#F7F8FA; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; display:flex; align-items:center; justify-content:center; height:100vh;">
-    <p style="color:#667085; font-size:14px;">Ledger açılıyor... <a href="ana-sayfa/ana-sayfa.html" style="color:#263B73; font-weight:600;">Tıklayın</a></p>
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./sw.js', { scope: './' }).catch((e) => console.warn('SW kaydı atlandı:', e));
-        });
-      }
-    </script>
+<body>
+  <div class="app-container">
+    
+    <!-- Üst Başlık Barı -->
+    <header class="app-header">
+      <div class="app-brand">
+        <div class="app-logo">
+          <script>document.write(icon('wallet', 24));</script>
+        </div>
+        <div class="app-titles">
+          <h1>Ledger</h1>
+          <p id="appHeaderSub">Kişisel Veresiye & Cari Defteri</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button type="button" class="btn-icon" onclick="openSettingsModal()" title="Yedekleme ve Ayarlar" aria-label="Ayarlar">
+          <script>document.write(icon('settings', 20));</script>
+        </button>
+      </div>
+    </header>
+
+    <!-- ============================================== -->
+    <!-- 1. SEKME: ÖZET (DASHBOARD)                     -->
+    <!-- ============================================== -->
+    <main id="view-dashboard" class="view-panel active">
+      <!-- Hero Bakiye Kartı -->
+      <section class="hero-card">
+        <div class="hero-header">
+          <span>Toplam Açık Alacak</span>
+          <button type="button" id="dashBakiyeGizleBtn" class="btn-ghost-toggle" onclick="toggleGenelBakiye()">
+            <script>document.write(icon('eye', 14));</script>
+            <span>Gizle</span>
+          </button>
+        </div>
+        <div id="dashGenelBakiye" class="hero-amount tabular-nums">₺0,00</div>
+        
+        <div class="hero-stats">
+          <div class="stat-item">
+            <span class="stat-label">Toplam Veresiye (Alacak)</span>
+            <span id="dashToplamAlacak" class="stat-val red tabular-nums">₺0,00</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Toplam Tahsil Edilen</span>
+            <span id="dashToplamTahsilat" class="stat-val green tabular-nums">₺0,00</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Hızlı İşlem Ekleme İkili Butonları -->
+      <div class="quick-actions-grid">
+        <div class="quick-action-btn" onclick="openIslemModal({ tip: 'hizmet' })" role="button" tabindex="0">
+          <div class="action-icon-circle borc">
+            <script>document.write(icon('arrow-up-right', 20));</script>
+          </div>
+          <div class="action-text">
+            <strong>Borç / Hizmet Yaz</strong>
+            <span>Veresiye kaydı ekle</span>
+          </div>
+        </div>
+
+        <div class="quick-action-btn" onclick="openIslemModal({ tip: 'odeme' })" role="button" tabindex="0">
+          <div class="action-icon-circle odeme">
+            <script>document.write(icon('arrow-down-left', 20));</script>
+          </div>
+          <div class="action-text">
+            <strong>Tahsilat Al</strong>
+            <span>Ödeme kaydet</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cari Durum Özeti Çubuğu -->
+      <div class="card" style="padding: 14px 16px; display: flex; align-items: center; justify-content: space-between;" onclick="switchTab('customers')">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 38px; height: 38px; border-radius: 10px; background: #F1F5F9; color: var(--primary); display: flex; align-items: center; justify-content: center;">
+            <script>document.write(icon('users', 20));</script>
+          </div>
+          <div>
+            <strong style="font-size: 0.9rem; color: var(--text-main); display: block;">Kayıtlı Cari Hesaplar</strong>
+            <span style="font-size: 0.75rem; color: var(--text-muted);">
+              <span id="dashMusteriSayisi">0 Kişi</span> · <span id="dashBorcluSayisi" style="color: var(--borc-red); font-weight: 600;">0 Borçlu</span>
+            </span>
+          </div>
+        </div>
+        <button type="button" class="btn btn-outline" style="padding: 6px 12px; font-size: 0.75rem; min-height: 32px;">
+          Müşteriler <script>document.write(icon('chevron-right', 14));</script>
+        </button>
+      </div>
+
+      <!-- Son İşlemler Akışı -->
+      <section class="mt-4">
+        <div class="section-header">
+          <h2>Son İşlemler</h2>
+          <button type="button" class="section-link" onclick="switchTab('reports')">Tümünü Gör →</button>
+        </div>
+        <div id="dashSonIslemlerList">
+          <!-- Dinamik doldurulur -->
+        </div>
+      </section>
+    </main>
+
+    <!-- ============================================== -->
+    <!-- 2. SEKME: MÜŞTERİLER (CARİ HESAPLAR)           -->
+    <!-- ============================================== -->
+    <main id="view-customers" class="view-panel">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+        <div>
+          <h2 style="font-size: 1.15rem; font-weight: 700;">Müşteriler</h2>
+          <p style="font-size: 0.75rem; color: var(--text-muted);" id="customerCountBadge">0 Kişi</p>
+        </div>
+        <button type="button" class="btn btn-primary" onclick="openMusteriModal()">
+          <script>document.write(icon('user-plus', 16));</script> Yeni Müşteri
+        </button>
+      </div>
+
+      <!-- Canlı Arama Kutusu -->
+      <div class="search-box-wrapper">
+        <span class="search-icon">
+          <script>document.write(icon('magnifier', 18));</script>
+        </span>
+        <input type="search" id="customerSearchInput" class="search-input" placeholder="Müşteri adı veya telefon ile ara..." autocomplete="off" />
+      </div>
+
+      <!-- Filtre Çipleri -->
+      <div class="filter-chips">
+        <button type="button" class="chip active" data-filter="all" onclick="setCustomerFilter('all')">Tümü</button>
+        <button type="button" class="chip" data-filter="borclu" onclick="setCustomerFilter('borclu')">🔴 Borçlular</button>
+        <button type="button" class="chip" data-filter="alacakli" onclick="setCustomerFilter('alacakli')">🟢 Alacaklılar</button>
+        <button type="button" class="chip" data-filter="sifir" onclick="setCustomerFilter('sifir')">⚪ Sıfır Bakiye</button>
+      </div>
+
+      <!-- Müşteri Listesi -->
+      <div id="customerListContainer">
+        <!-- Dinamik doldurulur -->
+      </div>
+    </main>
+
+    <!-- ============================================== -->
+    <!-- 3. SEKME: HAREKETLER / RAPORLAR (EKSTRE)       -->
+    <!-- ============================================== -->
+    <main id="view-reports" class="view-panel">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+        <div>
+          <h2 style="font-size: 1.15rem; font-weight: 700;">Hesap Ekstresi</h2>
+          <p style="font-size: 0.75rem; color: var(--text-muted);">Mali Hareketler ve Döküm</p>
+        </div>
+        <div style="display: flex; gap: 6px;">
+          <button type="button" class="btn btn-outline" style="padding: 6px 10px; font-size: 0.75rem; min-height: 36px;" onclick="copyEkstreText()" title="WhatsApp formatında kopyala">
+            <script>document.write(icon('copy', 14));</script> Kopyala
+          </button>
+          <button type="button" class="btn btn-outline" style="padding: 6px 10px; font-size: 0.75rem; min-height: 36px;" onclick="window.print()" title="Yazdır veya PDF Kaydet">
+            <script>document.write(icon('printer', 14));</script> Yazdır
+          </button>
+        </div>
+      </div>
+
+      <!-- Müşteri Seçici -->
+      <div class="card" style="padding: 14px; margin-bottom: 12px;">
+        <label class="form-label" for="reportMusteriSelect">Kişi / Cari Seçimi</label>
+        <select id="reportMusteriSelect" class="form-select" onchange="handleReportMusteriChange(event)">
+          <option value="all">🏢 Tüm Müşteriler (Genel Ekstre)</option>
+        </select>
+      </div>
+
+      <!-- Seçili Müşteri Özel Banner'ı (Varsa) -->
+      <div id="reportCustomerBanner" class="card" style="display: none; background: #F8FAFC; border-color: var(--primary-accent); margin-bottom: 12px;"></div>
+
+      <!-- Tarih Filtreleme Çipleri -->
+      <div class="card" style="padding: 14px; margin-bottom: 12px;">
+        <span class="form-label" style="margin-bottom: 8px;">Dönem Filtresi</span>
+        <div class="filter-chips" id="reportDateChips" style="margin-bottom: 10px;">
+          <button type="button" class="chip active" data-date="tumu" onclick="setReportDateFilter('tumu')">Tümü</button>
+          <button type="button" class="chip" data-date="bugun" onclick="setReportDateFilter('bugun')">Bugün</button>
+          <button type="button" class="chip" data-date="bu-ay" onclick="setReportDateFilter('bu-ay')">Bu Ay</button>
+          <button type="button" class="chip" data-date="son-30-gun" onclick="setReportDateFilter('son-30-gun')">Son 30 Gün</button>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+          <div>
+            <label style="font-size: 0.6875rem; color: var(--text-muted); display: block; margin-bottom: 2px;">Başlangıç</label>
+            <input type="date" id="reportBaslangic" class="form-input" style="padding: 8px 10px; font-size: 14px !important;" onchange="renderReports()" />
+          </div>
+          <div>
+            <label style="font-size: 0.6875rem; color: var(--text-muted); display: block; margin-bottom: 2px;">Bitiş</label>
+            <input type="date" id="reportBitis" class="form-input" style="padding: 8px 10px; font-size: 14px !important;" onchange="renderReports()" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Dönem Bakiye Özeti Kartı -->
+      <div class="report-summary-card">
+        <div class="report-summary-box">
+          <p>Dönem Alacak</p>
+          <strong id="repOzetAlacak" class="red tabular-nums">₺0,00</strong>
+        </div>
+        <div class="report-summary-box">
+          <p>Dönem Tahsilat</p>
+          <strong id="repOzetTahsilat" class="green tabular-nums">₺0,00</strong>
+        </div>
+        <div class="report-summary-box highlight">
+          <p>Net Fark</p>
+          <strong id="repOzetNet" class="tabular-nums">₺0,00</strong>
+        </div>
+      </div>
+
+      <!-- Kronolojik Hareket Akışı (Kaydırmasız Kartlar) -->
+      <div id="reportTimelineContainer">
+        <!-- Dinamik doldurulur -->
+      </div>
+    </main>
+
+  </div>
+
+  <!-- ============================================== -->
+  <!-- ALT SABİT NAVİGASYON BARI (iOS BOTTOM TAB BAR) -->
+  <!-- ============================================== -->
+  <nav class="bottom-nav" role="navigation" aria-label="Ana Menü">
+    <div class="bottom-nav-inner">
+      <button type="button" class="nav-tab active" data-tab="dashboard" onclick="switchTab('dashboard')" aria-label="Özet">
+        <script>document.write(icon('home', 22));</script>
+        <span>Özet</span>
+      </button>
+
+      <button type="button" class="nav-tab" data-tab="customers" onclick="switchTab('customers')" aria-label="Müşteriler">
+        <script>document.write(icon('users', 22));</script>
+        <span>Müşteriler</span>
+      </button>
+
+      <!-- Ortadaki Hızlı İşlem Ekle FAB Butonu -->
+      <button type="button" class="nav-fab-btn" onclick="openIslemModal()" aria-label="Yeni İşlem Ekle" title="Hızlı İşlem Ekle">
+        <script>document.write(icon('plus', 26));</script>
+      </button>
+
+      <button type="button" class="nav-tab" data-tab="reports" onclick="switchTab('reports')" aria-label="Hareketler">
+        <script>document.write(icon('chart', 22));</script>
+        <span>Hareketler</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ============================================== -->
+  <!-- MODAL 1: EVRENSEL İŞLEM EKLE (TAHSİLAT / BORÇ) -->
+  <!-- ============================================== -->
+  <div id="modalIslemOverlay" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalIslemTitle">
+    <div class="bottom-sheet">
+      <div class="sheet-drag-handle"></div>
+      
+      <div class="modal-header">
+        <h3 id="modalIslemTitle">Yeni İşlem Kaydı</h3>
+        <button type="button" class="btn-icon" onclick="closeAllModals()" aria-label="Kapat">
+          <script>document.write(icon('close', 20));</script>
+        </button>
+      </div>
+
+      <!-- Tip Seçici Switcher -->
+      <div class="type-toggle-switch" role="tablist">
+        <button type="button" id="islemToggleBtnOdeme" class="type-toggle-btn active odeme" onclick="setIslemModalTip('odeme')">
+          <script>document.write(icon('arrow-down-left', 16));</script> Tahsilat (Ödeme Al)
+        </button>
+        <button type="button" id="islemToggleBtnBorc" class="type-toggle-btn" onclick="setIslemModalTip('hizmet')">
+          <script>document.write(icon('arrow-up-right', 16));</script> Borç / Veresiye Yaz
+        </button>
+      </div>
+
+      <form onsubmit="handleIslemSubmit(event)">
+        <!-- Müşteri Seçimi -->
+        <div class="form-group">
+          <label class="form-label" for="islemModalMusteriSelect">Müşteri Seçin *</label>
+          <select id="islemModalMusteriSelect" class="form-select" required onchange="updateBakiyeyiKapatButton()">
+            <option value="">Yükleniyor...</option>
+          </select>
+        </div>
+
+        <!-- Tutar Girişi -->
+        <div class="form-group">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+            <label class="form-label" for="islemModalTutar" style="margin-bottom: 0;">Tutar (TL) *</label>
+            <button type="button" id="btnHizliKapatBakiye" class="btn-ghost-toggle" style="display: none; background: #DCFCE7; color: #166534; font-size: 0.75rem;">
+              Bakiyeyi Kapat
+            </button>
+          </div>
+          <div class="amount-input-box">
+            <span class="amount-currency-symbol">₺</span>
+            <input type="number" id="islemModalTutar" step="0.01" min="0.01" required placeholder="0.00" inputmode="decimal" class="amount-input-field tabular-nums" />
+          </div>
+          <!-- Hızlı Meblağ Butonları -->
+          <div class="quick-amount-chips">
+            <button type="button" class="quick-amount-btn" onclick="addQuickAmount(100)">+₺100</button>
+            <button type="button" class="quick-amount-btn" onclick="addQuickAmount(250)">+₺250</button>
+            <button type="button" class="quick-amount-btn" onclick="addQuickAmount(500)">+₺500</button>
+            <button type="button" class="quick-amount-btn" onclick="addQuickAmount(1000)">+₺1.000</button>
+            <button type="button" class="quick-amount-btn" onclick="addQuickAmount(5000)">+₺5.000</button>
+          </div>
+        </div>
+
+        <!-- Açıklama -->
+        <div class="form-group">
+          <label class="form-label" for="islemModalAciklama">Açıklama / Not</label>
+          <input type="text" id="islemModalAciklama" class="form-input" placeholder="Örn: Nakit Tahsilat veya Malzeme Bedeli" />
+        </div>
+
+        <!-- Tarih -->
+        <div class="form-group">
+          <label class="form-label" for="islemModalTarih">İşlem Tarihi</label>
+          <input type="date" id="islemModalTarih" class="form-input" required />
+        </div>
+
+        <button type="submit" id="islemModalSubmitBtn" class="btn btn-odeme" style="width: 100%; height: 48px; margin-top: 8px;">
+          <script>document.write(icon('arrow-down-left', 18));</script> Tahsilatı Kaydet
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL 2: MÜŞTERİ EKLE / DÜZENLE                 -->
+  <!-- ============================================== -->
+  <div id="modalMusteriOverlay" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="musteriModalTitle">
+    <div class="bottom-sheet">
+      <div class="sheet-drag-handle"></div>
+      
+      <div class="modal-header">
+        <h3 id="musteriModalTitle">Yeni Müşteri Ekle</h3>
+        <button type="button" class="btn-icon" onclick="closeAllModals()" aria-label="Kapat">
+          <script>document.write(icon('close', 20));</script>
+        </button>
+      </div>
+
+      <form onsubmit="handleMusteriSubmit(event)">
+        <div class="form-group">
+          <label class="form-label" for="musteriModalAd">Müşteri / Firma Adı *</label>
+          <input type="text" id="musteriModalAd" class="form-input" placeholder="Örn: Ahmet Yılmaz" required autocomplete="off" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="musteriModalTel">Telefon Numarası</label>
+          <input type="tel" id="musteriModalTel" class="form-input" placeholder="05XX XXX XX XX" inputmode="tel" />
+        </div>
+
+        <div class="form-group" id="musteriModalIlkBakiyeDiv">
+          <label class="form-label" for="musteriModalIlkBakiye">Devreden Borç Bakiyesi (Varsa)</label>
+          <div class="amount-input-box">
+            <span class="amount-currency-symbol" style="font-size: 1.1rem;">₺</span>
+            <input type="number" id="musteriModalIlkBakiye" step="0.01" min="0" placeholder="0.00" inputmode="decimal" class="form-input tabular-nums" style="padding-left: 36px;" />
+          </div>
+          <p style="font-size: 0.72rem; color: var(--text-muted); margin-top: 4px;">Eski defterden devir gelen borç varsa buraya girebilirsiniz.</p>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; height: 46px; margin-top: 8px;">
+          Kaydet
+        </button>
+
+        <div id="musteriModalSilBtn" style="display: none; margin-top: 14px; border-top: 1px solid var(--border); padding-top: 12px;">
+          <button type="button" class="btn btn-borc" style="width: 100%;" onclick="handleMusteriSil()">
+            <script>document.write(icon('trash', 16));</script> Kişiyi ve Tüm Hareketlerini Sil
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL 3: YEDEKLEME & AYARLAR                   -->
+  <!-- ============================================== -->
+  <div id="modalSettingsOverlay" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="settingsModalTitle">
+    <div class="bottom-sheet">
+      <div class="sheet-drag-handle"></div>
+      
+      <div class="modal-header">
+        <h3 id="settingsModalTitle">Yedekleme & Ayarlar</h3>
+        <button type="button" class="btn-icon" onclick="closeAllModals()" aria-label="Kapat">
+          <script>document.write(icon('close', 20));</script>
+        </button>
+      </div>
+
+      <div style="space-y: 12px;">
+        <div class="card" style="padding: 14px; margin-bottom: 12px; background: #F8FAFC;">
+          <strong style="font-size: 0.85rem; color: var(--text-main); display: block; margin-bottom: 4px;">Verileriniz Güvende</strong>
+          <p style="font-size: 0.75rem; color: var(--text-muted);">
+            Tüm kayıtlarınız telefonunuzun hafızasında (IndexedDB) saklanır. İnternetiniz olmasa bile çevrimdışı çalışır. Verilerinizi düzenli olarak yedeklemenizi öneririz.
+          </p>
+        </div>
+
+        <!-- Yedek Dışa Aktarma -->
+        <button type="button" class="btn btn-outline" style="width: 100%; justify-content: flex-start; height: 48px; margin-bottom: 8px;" onclick="handleExportBackup()">
+          <script>document.write(icon('download', 18));</script>
+          <div style="text-align: left; margin-left: 6px;">
+            <strong style="display: block; font-size: 0.85rem;">Yedek Al (JSON / WhatsApp Paylaş)</strong>
+            <span style="font-size: 0.7rem; color: var(--text-muted);">Dosyalarınıza kaydedin veya WhatsApp ile gönderin</span>
+          </div>
+        </button>
+
+        <!-- Yedek İçe Aktarma -->
+        <label class="btn btn-outline" style="width: 100%; justify-content: flex-start; height: 48px; margin-bottom: 8px; cursor: pointer;">
+          <script>document.write(icon('upload', 18));</script>
+          <div style="text-align: left; margin-left: 6px;">
+            <strong style="display: block; font-size: 0.85rem;">Yedek Dosyası Yükle (Geri Yükle)</strong>
+            <span style="font-size: 0.7rem; color: var(--text-muted);">Daha önce aldığınız .json yedeğini geri yükleyin</span>
+          </div>
+          <input type="file" accept=".json" style="display: none;" onchange="handleImportBackup(event)" />
+        </label>
+
+        <!-- Örnek Veri Yükleme -->
+        <button type="button" class="btn btn-outline" style="width: 100%; justify-content: flex-start; height: 44px; margin-bottom: 16px;" onclick="handleSampleDataLoad()">
+          <script>document.write(icon('plus-circle', 18));</script>
+          <div style="text-align: left; margin-left: 6px;">
+            <strong style="display: block; font-size: 0.85rem;">Örnek Veri Yükle</strong>
+            <span style="font-size: 0.7rem; color: var(--text-muted);">3 örnek müşteri ve deneme işlemleri yükler</span>
+          </div>
+        </button>
+
+        <!-- Sıfırlama -->
+        <div style="border-top: 1px solid var(--border); padding-top: 12px;">
+          <button type="button" class="btn btn-borc" style="width: 100%;" onclick="handleResetAllData()">
+            <script>document.write(icon('trash', 16));</script> Tüm Veritabanını Sıfırla
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Bildirim Alanı -->
+  <div id="appToastContainer" class="toast-container" aria-live="polite"></div>
+
+  <!-- Service Worker Kaydı -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js', { scope: './' })
+          .then((reg) => console.log('SW hazır:', reg.scope))
+          .catch((err) => console.warn('SW kaydı atlandı:', err));
+      });
+    }
+  </script>
 </body>
 </html>
