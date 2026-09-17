@@ -97,6 +97,14 @@ function bindEvents() {
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') closeAllModals();
     });
+
+    // Mobil Geri Tuşu (popstate) Dinleyicisi — iPhone Swipe-Back ile modal kapatma
+    window.addEventListener('popstate', () => {
+        const openModals = document.querySelectorAll('.modal-overlay.open');
+        if (openModals.length > 0) {
+            closeAllModals(true);
+        }
+    });
 }
 
 // --- SEKME (TAB) YÖNETİMİ --- //
@@ -104,14 +112,16 @@ function bindEvents() {
 function switchTab(tabName) {
     state.currentTab = tabName;
 
-    // Sekme panellerini göster/gizle
+    // Sekme panellerini göster/gizle ve ARIA güncelle
     document.querySelectorAll('.view-panel').forEach((panel) => {
         panel.classList.remove('active');
+        panel.setAttribute('aria-hidden', 'true');
     });
 
     const targetPanel = document.getElementById(`view-${tabName}`);
     if (targetPanel) {
         targetPanel.classList.add('active');
+        targetPanel.setAttribute('aria-hidden', 'false');
     }
 
     // Alt navigasyon barı butonlarını güncelle
@@ -120,11 +130,21 @@ function switchTab(tabName) {
         if (tab === tabName) {
             tabBtn.classList.add('active');
             tabBtn.setAttribute('aria-current', 'page');
+            tabBtn.setAttribute('aria-selected', 'true');
         } else {
             tabBtn.classList.remove('active');
             tabBtn.removeAttribute('aria-current');
+            tabBtn.setAttribute('aria-selected', 'false');
         }
     });
+
+    // URL parametresini güncelle (sayfa yenilendiğinde aktif sekme korunsun)
+    try {
+        const url = new URL(window.location);
+        url.searchParams.set('tab', tabName);
+        if (tabName !== 'reports') url.searchParams.delete('musteriId');
+        window.history.replaceState({ tab: tabName }, '', url);
+    } catch (e) {}
 
     // Sayfa tepeye kaydırılsın
     window.scrollTo({ top: 0, behavior: 'instant' });
@@ -637,8 +657,31 @@ function copyEkstreText() {
 
 // --- 4. MODAL YÖNETİMİ & FORMLAR --- //
 
-function closeAllModals() {
-    document.querySelectorAll('.modal-overlay').forEach((m) => m.classList.remove('open'));
+function openModalOverlay(overlayId) {
+    const overlay = typeof overlayId === 'string' ? document.getElementById(overlayId) : overlayId;
+    if (!overlay) return;
+
+    // Henüz açık değilse geçmişe ekle (iOS swipe-back ile modal kapatılabilmesi için)
+    if (!overlay.classList.contains('open')) {
+        try {
+            window.history.pushState({ ledgerModal: overlay.id || true }, '');
+        } catch (e) {}
+    }
+    overlay.classList.add('open');
+}
+
+function closeAllModals(fromPopState = false) {
+    const openModals = document.querySelectorAll('.modal-overlay.open');
+    if (openModals.length === 0) return;
+
+    openModals.forEach((m) => m.classList.remove('open'));
+
+    // Eğer kullanıcı arayüzdeki çarpıdan veya backdrop'tan kapattıysa ve history'de modal varsa pop yap
+    if (!fromPopState && window.history.state && window.history.state.ledgerModal) {
+        try {
+            window.history.back();
+        } catch (e) {}
+    }
 }
 
 // İşlem Ekle Modalı
@@ -676,8 +719,7 @@ function openIslemModal(options = {}) {
     // Bakiye Kapat butonunu hazırla
     updateBakiyeyiKapatButton();
 
-    const overlay = document.getElementById('modalIslemOverlay');
-    if (overlay) overlay.classList.add('open');
+    openModalOverlay('modalIslemOverlay');
 
     // İlk inputa odaklan
     setTimeout(() => {
@@ -800,8 +842,7 @@ function openMusteriModal(musteriId = null) {
         if (silBtn) silBtn.style.display = 'none';
     }
 
-    const overlay = document.getElementById('modalMusteriOverlay');
-    if (overlay) overlay.classList.add('open');
+    openModalOverlay('modalMusteriOverlay');
 
     setTimeout(() => {
         if (adInput) adInput.focus();
@@ -859,8 +900,7 @@ async function handleMusteriSil() {
 
 // Yedekleme ve Ayarlar Modalı
 function openSettingsModal() {
-    const overlay = document.getElementById('modalSettingsOverlay');
-    if (overlay) overlay.classList.add('open');
+    openModalOverlay('modalSettingsOverlay');
 }
 
 async function handleExportBackup() {

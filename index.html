@@ -45,7 +45,7 @@
     <!-- ============================================== -->
     <!-- 1. SEKME: ÖZET (DASHBOARD)                     -->
     <!-- ============================================== -->
-    <main id="view-dashboard" class="view-panel active">
+    <main id="view-dashboard" class="view-panel active" role="tabpanel" aria-labelledby="tab-dashboard">
       <!-- Hero Bakiye Kartı -->
       <section class="hero-card">
         <div class="hero-header">
@@ -125,7 +125,7 @@
     <!-- ============================================== -->
     <!-- 2. SEKME: MÜŞTERİLER (CARİ HESAPLAR)           -->
     <!-- ============================================== -->
-    <main id="view-customers" class="view-panel">
+    <main id="view-customers" class="view-panel" role="tabpanel" aria-labelledby="tab-customers">
       <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
         <div>
           <h2 style="font-size: 1.15rem; font-weight: 700;">Müşteriler</h2>
@@ -166,7 +166,7 @@
     <!-- ============================================== -->
     <!-- 3. SEKME: HAREKETLER / RAPORLAR (EKSTRE)       -->
     <!-- ============================================== -->
-    <main id="view-reports" class="view-panel">
+    <main id="view-reports" class="view-panel" role="tabpanel" aria-labelledby="tab-reports">
       <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
         <div>
           <h2 style="font-size: 1.15rem; font-weight: 700;">Hesap Ekstresi</h2>
@@ -204,12 +204,12 @@
         </div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
           <div>
-            <label style="font-size: 0.6875rem; color: var(--text-muted); display: block; margin-bottom: 2px;">Başlangıç</label>
-            <input type="date" id="reportBaslangic" class="form-input" style="padding: 8px 10px; font-size: 14px !important;" onchange="renderReports()" />
+            <label for="reportBaslangic" style="font-size: 0.6875rem; color: var(--text-muted); display: block; margin-bottom: 2px;">Başlangıç</label>
+            <input type="date" id="reportBaslangic" class="form-input" style="padding: 8px 10px;" onchange="renderReports()" />
           </div>
           <div>
-            <label style="font-size: 0.6875rem; color: var(--text-muted); display: block; margin-bottom: 2px;">Bitiş</label>
-            <input type="date" id="reportBitis" class="form-input" style="padding: 8px 10px; font-size: 14px !important;" onchange="renderReports()" />
+            <label for="reportBitis" style="font-size: 0.6875rem; color: var(--text-muted); display: block; margin-bottom: 2px;">Bitiş</label>
+            <input type="date" id="reportBitis" class="form-input" style="padding: 8px 10px;" onchange="renderReports()" />
           </div>
         </div>
       </div>
@@ -242,13 +242,13 @@
   <!-- ALT SABİT NAVİGASYON BARI (iOS BOTTOM TAB BAR) -->
   <!-- ============================================== -->
   <nav class="bottom-nav" role="navigation" aria-label="Ana Menü">
-    <div class="bottom-nav-inner">
-      <button type="button" class="nav-tab active" data-tab="dashboard" onclick="switchTab('dashboard')" aria-label="Özet">
+    <div class="bottom-nav-inner" role="tablist" aria-label="Sayfa Sekmeleri">
+      <button type="button" id="tab-dashboard" class="nav-tab active" data-tab="dashboard" role="tab" aria-selected="true" aria-controls="view-dashboard" onclick="switchTab('dashboard')" aria-label="Özet">
         <script>document.write(icon('home', 22));</script>
         <span>Özet</span>
       </button>
 
-      <button type="button" class="nav-tab" data-tab="customers" onclick="switchTab('customers')" aria-label="Müşteriler">
+      <button type="button" id="tab-customers" class="nav-tab" data-tab="customers" role="tab" aria-selected="false" aria-controls="view-customers" onclick="switchTab('customers')" aria-label="Müşteriler">
         <script>document.write(icon('users', 22));</script>
         <span>Müşteriler</span>
       </button>
@@ -258,7 +258,7 @@
         <script>document.write(icon('plus', 26));</script>
       </button>
 
-      <button type="button" class="nav-tab" data-tab="reports" onclick="switchTab('reports')" aria-label="Hareketler">
+      <button type="button" id="tab-reports" class="nav-tab" data-tab="reports" role="tab" aria-selected="false" aria-controls="view-reports" onclick="switchTab('reports')" aria-label="Hareketler">
         <script>document.write(icon('chart', 22));</script>
         <span>Hareketler</span>
       </button>
