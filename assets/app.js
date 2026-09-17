@@ -9,9 +9,11 @@ const state = {
     bakiyeGizli: false,
     selectedMusteriId: null,
     customerFilter: 'all', // 'all' | 'borclu' | 'alacakli' | 'sifir'
+    customerSort: 'debt', // 'debt' (En çok borcu olan) | 'date' (Son işlem)
     reportDateFilter: 'tumu', // 'tumu' | 'bu-ay' | 'son-30-gun' | 'bugun'
     reportMusteriId: 'all',
     searchQuery: '',
+    currentTheme: 'auto', // 'auto' | 'light' | 'dark'
     cachedCustomers: [],
     cachedTransactions: []
 };
@@ -20,6 +22,7 @@ const state = {
 
 document.addEventListener('DOMContentLoaded', async () => {
     try {
+        initTheme();
         await initDB();
         bindEvents();
         handleUrlParams();
@@ -29,6 +32,32 @@ document.addEventListener('DOMContentLoaded', async () => {
         showToast('Veritabanı başlatılamadı: ' + err.message, 'error');
     }
 });
+
+// --- TEMA (DARK / LIGHT MODE) YÖNETİMİ --- //
+
+function initTheme() {
+    const saved = localStorage.getItem('ledger_theme') || 'auto';
+    setTheme(saved, false);
+}
+
+function setTheme(theme, save = true) {
+    state.currentTheme = theme;
+    if (save) localStorage.setItem('ledger_theme', theme);
+
+    if (theme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+    } else if (theme === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+    } else {
+        document.documentElement.removeAttribute('data-theme');
+    }
+
+    // Modal içindeki buton durumlarını güncelle
+    document.querySelectorAll('.theme-btn').forEach((btn) => {
+        if (btn.dataset.theme === theme) btn.classList.add('active');
+        else btn.classList.remove('active');
+    });
+}
 
 function handleUrlParams() {
     const params = new URLSearchParams(window.location.search);
@@ -167,7 +196,11 @@ async function renderDashboard() {
         return;
     }
 
+    // Müşteri isimlerini dinamik eşle
+    const musteriMap = new Map((state.cachedCustomers || []).map((m) => [m.id, m.ad]));
+
     container.innerHTML = sonIslemler.map((tx) => {
+        const musteriAd = musteriMap.get(tx.musteriId) || tx.musteriAd || 'Müşteri';
         const isOdeme = tx.tip === 'odeme';
         const iconName = isOdeme ? 'arrow-down-left' : 'arrow-up-right';
         const circleClass = isOdeme ? 'odeme' : 'hizmet';
@@ -181,7 +214,7 @@ async function renderDashboard() {
                         ${icon(iconName, 18)}
                     </div>
                     <div class="tx-meta">
-                        <div class="tx-title">${escapeHtml(tx.musteriAd || 'Müşteri')}</div>
+                        <div class="tx-title">${escapeHtml(musteriAd)}</div>
                         <div class="tx-subtitle">${formatRelativeDate(tx.tarih)} · ${escapeHtml(tx.aciklama || (isOdeme ? 'Tahsilat' : 'Hizmet Bedeli'))}</div>
                     </div>
                 </div>
@@ -214,6 +247,15 @@ function setCustomerFilter(filterType) {
     renderCustomers();
 }
 
+function toggleCustomerSort() {
+    state.customerSort = state.customerSort === 'debt' ? 'date' : 'debt';
+    const sortBtn = document.getElementById('customerSortBtn');
+    if (sortBtn) {
+        sortBtn.innerHTML = `${icon('filter', 13)} <span>${state.customerSort === 'debt' ? 'En Çok Borç' : 'Son İşlem'}</span>`;
+    }
+    renderCustomers();
+}
+
 function renderCustomers() {
     const container = document.getElementById('customerListContainer');
     if (!container) return;
@@ -237,6 +279,13 @@ function renderCustomers() {
         list = list.filter((m) => m.netBakiyeKurus < 0);
     } else if (state.customerFilter === 'sifir') {
         list = list.filter((m) => m.netBakiyeKurus === 0);
+    }
+
+    // Sıralama (Borca Göre vs Tarihe Göre)
+    if (state.customerSort === 'debt') {
+        list.sort((a, b) => b.netBakiyeKurus - a.netBakiyeKurus);
+    } else {
+        list.sort((a, b) => new Date(b.sonIslemTarihi) - new Date(a.sonIslemTarihi));
     }
 
     // Başlık Sayacı
@@ -278,16 +327,18 @@ function renderCustomers() {
 
         const odeme = m.odemeDurumu || { text: 'Henüz ödeme yok', status: 'clean', icon: 'clock' };
 
-        // WhatsApp Hazır Mesajı
+        // WhatsApp Hazır Mesajı (Tam Türkçe & Profesyonel)
         const cleanTel = (m.telefon || '').replace(/[^0-9]/g, '');
         let waUrl = '';
         if (cleanTel) {
             const telWithCode = cleanTel.startsWith('0') ? '9' + cleanTel : (cleanTel.startsWith('90') ? cleanTel : '90' + cleanTel);
             const bakiyeMetni = isBorclu
-                ? `Sayın ${m.ad}, Ledger veresiye kayıtlarımıza göre güncel bakiyeniz ${formatCurrency(m.netBakiyeKurus)} borç olarak görünmektedir.`
-                : `Sayın ${m.ad}, hesabınızda borç bulunmamaktadır. Teşekkür ederiz.`;
+                ? `Sayın ${m.ad},\n\nLedger cari kayıtlarımıza göre güncel açık bakiyeniz ${formatCurrency(m.netBakiyeKurus)} borç olarak görünmektedir.\n\nBilgilerinize sunar, iyi günler dileriz.`
+                : `Sayın ${m.ad},\n\nLedger cari kayıtlarımıza göre hesabınızda borç bulunmamaktadır. İyi çalışmalar dileriz.`;
             waUrl = `https://wa.me/${telWithCode}?text=${encodeURIComponent(bakiyeMetni)}`;
         }
+
+        const phoneDisplay = formatPhoneTR(m.telefon);
 
         return `
             <div class="customer-card" onclick="openCustomerDetail(${m.id})">
@@ -299,7 +350,7 @@ function renderCustomers() {
                         <div class="customer-details">
                             <div class="customer-name">${escapeHtml(m.ad)}</div>
                             <div class="customer-subtext">
-                                ${m.telefon ? `<span onclick="event.stopPropagation(); window.location.href='tel:${escapeHtml(m.telefon)}'" style="color: var(--primary-accent);">${icon('phone', 12)} ${escapeHtml(m.telefon)}</span>` : '<span>Telefon yok</span>'}
+                                ${phoneDisplay ? `<span onclick="event.stopPropagation(); window.location.href='tel:${escapeHtml(m.telefon)}'" style="color: var(--primary-accent);">${icon('phone', 12)} ${escapeHtml(phoneDisplay)}</span>` : '<span>Telefon yok</span>'}
                             </div>
                             <div class="customer-status-badge ${odeme.status}">
                                 ${icon(odeme.icon, 13)}
@@ -443,7 +494,7 @@ function renderReports() {
                         <div>
                             <span style="font-size: 0.7rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase;">Müşteri Ekstresi</span>
                             <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--text-main); margin-top: 2px;">${escapeHtml(m.ad)}</h3>
-                            <p style="font-size: 0.75rem; color: var(--text-muted);">${m.telefon || 'Telefon belirtilmemiş'}</p>
+                            <p style="font-size: 0.75rem; color: var(--text-muted);">${formatPhoneTR(m.telefon) || 'Telefon belirtilmemiş'}</p>
                         </div>
                         <div style="text-align: right;">
                             <span style="font-size: 0.7rem; color: var(--text-muted);">Güncel Bakiye</span>
@@ -479,6 +530,9 @@ function renderReports() {
         return;
     }
 
+    // Müşteri isimlerini dinamik harita ile ilişkilendir (isim değişikliği anında yansır)
+    const musteriMap = new Map((state.cachedCustomers || []).map((m) => [m.id, m.ad]));
+
     // Tarihe göre gruplandır (Gün gün)
     const grouped = {};
     list.forEach((tx) => {
@@ -503,6 +557,7 @@ function renderReports() {
         `;
 
         items.forEach((tx) => {
+            const musteriAd = musteriMap.get(tx.musteriId) || tx.musteriAd || 'Müşteri';
             const isOdeme = tx.tip === 'odeme';
             const iconName = isOdeme ? 'arrow-down-left' : 'arrow-up-right';
             const circleClass = isOdeme ? 'odeme' : 'hizmet';
@@ -516,7 +571,7 @@ function renderReports() {
                             ${icon(iconName, 18)}
                         </div>
                         <div class="tx-meta">
-                            <div class="tx-title">${escapeHtml(tx.musteriAd || 'Müşteri')}</div>
+                            <div class="tx-title">${escapeHtml(musteriAd)}</div>
                             <div class="tx-subtitle">${escapeHtml(tx.aciklama || (isOdeme ? 'Tahsilat' : 'Hizmet Bedeli'))}</div>
                         </div>
                     </div>
@@ -821,7 +876,7 @@ async function handleImportBackup(e) {
     const file = e.target.files[0];
     if (!file) return;
 
-    const onay = confirm('Yedek dosyasını içe aktarmak mevcut tüm verilerinizin üzerine yazacaktır. Devam etmek istiyor musunuz?');
+    const onay = confirm('Yedek dosyasını içe aktarmak mevcut verilerinizin üzerine yazacaktır. Önce otomatik bir emniyet yedeği alınacaktır. Devam etmek istiyor musunuz?');
     if (!onay) {
         e.target.value = '';
         return;
@@ -829,14 +884,28 @@ async function handleImportBackup(e) {
 
     try {
         const text = await file.text();
-        await importData(text);
+        await importData(text, true);
         closeAllModals();
-        showToast('Yedek başarıyla yüklendi!', 'success');
+        showToast('Yedek başarıyla yüklendi! (Eski veriniz emniyet snapshotuna alındı)', 'success');
         await refreshAllData();
     } catch (err) {
         showToast('İçe aktarma hatası: ' + err.message, 'error');
     }
     e.target.value = '';
+}
+
+async function handleRestoreSafetySnapshot() {
+    const onay = confirm('Son otomatik emniyet snapshotuna geri dönmek istediğinizden emin misiniz?');
+    if (!onay) return;
+
+    try {
+        await restoreSafetySnapshot();
+        closeAllModals();
+        showToast('Emniyet snapshotu başarıyla geri yüklendi!', 'success');
+        await refreshAllData();
+    } catch (err) {
+        showToast('Emniyet snapshotu yüklenemedi: ' + err.message, 'warning');
+    }
 }
 
 async function handleSampleDataLoad() {
@@ -851,13 +920,17 @@ async function handleSampleDataLoad() {
 }
 
 async function handleResetAllData() {
-    const onay = confirm('DİKKAT: Tüm müşteri kayıtları ve finansal hareketler kalıcı olarak silinecektir.\n\nEmin misiniz?');
-    if (!onay) return;
+    // Parmak kaymasıyla veri kaybını önleyen çift onaylı typed prompt!
+    const cevap = prompt("DİKKAT: Tüm müşteri kayıtları ve finansal hareketler kalıcı olarak silinecektir.\n\nSilme işlemini onaylamak için lütfen büyük harflerle 'SİL' yazın:");
+    if (cevap !== 'SİL') {
+        showToast('İşlem iptal edildi. Hiçbir veri silinmedi.', 'warning');
+        return;
+    }
 
     try {
         await tumVerileriTemizle();
         closeAllModals();
-        showToast('Tüm veriler temizlendi.', 'success');
+        showToast('Tüm veriler temizlendi. (Eski kayıtlar emniyet snapshotunda saklandı)', 'success');
         await refreshAllData();
     } catch (err) {
         showToast('Sıfırlama hatası: ' + err.message, 'error');
@@ -901,7 +974,7 @@ function showToast(message, type = 'success', duration = 3000) {
     }, duration);
 }
 
-// Eski HTML çağrıları ve butonlar için köprü (Bridge) fonksiyonlar
+// Köprü (Bridge) fonksiyonlar
 window.openIslemModalOrtak = function(arg1, arg2) {
     if (typeof arg1 === 'number' || !isNaN(parseInt(arg1, 10))) {
         openIslemModal({ musteriId: parseInt(arg1, 10), tip: arg2 || 'odeme' });
@@ -911,8 +984,10 @@ window.openIslemModalOrtak = function(arg1, arg2) {
 };
 
 window.switchTab = switchTab;
+window.setTheme = setTheme;
 window.toggleGenelBakiye = toggleGenelBakiye;
 window.setCustomerFilter = setCustomerFilter;
+window.toggleCustomerSort = toggleCustomerSort;
 window.setReportDateFilter = setReportDateFilter;
 window.handleReportMusteriChange = handleReportMusteriChange;
 window.openCustomerDetail = openCustomerDetail;
@@ -926,6 +1001,7 @@ window.handleMusteriSil = handleMusteriSil;
 window.openSettingsModal = openSettingsModal;
 window.handleExportBackup = handleExportBackup;
 window.handleImportBackup = handleImportBackup;
+window.handleRestoreSafetySnapshot = handleRestoreSafetySnapshot;
 window.handleSampleDataLoad = handleSampleDataLoad;
 window.handleResetAllData = handleResetAllData;
 window.copyEkstreText = copyEkstreText;

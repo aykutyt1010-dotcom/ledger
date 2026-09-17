@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Ledger" />
@@ -93,9 +93,9 @@
       </div>
 
       <!-- Cari Durum Özeti Çubuğu -->
-      <div class="card" style="padding: 14px 16px; display: flex; align-items: center; justify-content: space-between;" onclick="switchTab('customers')">
+      <div class="card" style="padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; cursor: pointer;" onclick="switchTab('customers')">
         <div style="display: flex; align-items: center; gap: 12px;">
-          <div style="width: 38px; height: 38px; border-radius: 10px; background: #F1F5F9; color: var(--primary); display: flex; align-items: center; justify-content: center;">
+          <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(148, 163, 184, 0.15); color: var(--primary); display: flex; align-items: center; justify-content: center;">
             <script>document.write(icon('users', 20));</script>
           </div>
           <div>
@@ -131,9 +131,14 @@
           <h2 style="font-size: 1.15rem; font-weight: 700;">Müşteriler</h2>
           <p style="font-size: 0.75rem; color: var(--text-muted);" id="customerCountBadge">0 Kişi</p>
         </div>
-        <button type="button" class="btn btn-primary" onclick="openMusteriModal()">
-          <script>document.write(icon('user-plus', 16));</script> Yeni Müşteri
-        </button>
+        <div style="display: flex; gap: 8px;">
+          <button type="button" id="customerSortBtn" class="btn btn-outline" style="height: 38px; padding: 0 10px; font-size: 0.75rem;" onclick="toggleCustomerSort()">
+            <script>document.write(icon('filter', 14));</script> <span>En Çok Borç</span>
+          </button>
+          <button type="button" class="btn btn-primary" style="height: 38px;" onclick="openMusteriModal()">
+            <script>document.write(icon('user-plus', 16));</script> Yeni
+          </button>
+        </div>
       </div>
 
       <!-- Canlı Arama Kutusu -->
@@ -186,7 +191,7 @@
       </div>
 
       <!-- Seçili Müşteri Özel Banner'ı (Varsa) -->
-      <div id="reportCustomerBanner" class="card" style="display: none; background: #F8FAFC; border-color: var(--primary-accent); margin-bottom: 12px;"></div>
+      <div id="reportCustomerBanner" class="card" style="display: none; background: var(--bg-main); border-color: var(--primary-accent); margin-bottom: 12px;"></div>
 
       <!-- Tarih Filtreleme Çipleri -->
       <div class="card" style="padding: 14px; margin-bottom: 12px;">
@@ -395,46 +400,71 @@
         </button>
       </div>
 
-      <div style="space-y: 12px;">
-        <div class="card" style="padding: 14px; margin-bottom: 12px; background: #F8FAFC;">
-          <strong style="font-size: 0.85rem; color: var(--text-main); display: block; margin-bottom: 4px;">Verileriniz Güvende</strong>
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <!-- Tema Seçimi (Karanlık / Aydınlık Mod) -->
+        <div class="card" style="padding: 12px 14px; margin-bottom: 4px;">
+          <span class="form-label" style="margin-bottom: 8px;">Görünüm Teması</span>
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px;">
+            <button type="button" class="btn btn-outline theme-btn" data-theme="auto" style="height: 36px; font-size: 0.75rem; padding: 0;" onclick="setTheme('auto')">
+              Otomatik
+            </button>
+            <button type="button" class="btn btn-outline theme-btn" data-theme="light" style="height: 36px; font-size: 0.75rem; padding: 0;" onclick="setTheme('light')">
+              ☀️ Açık
+            </button>
+            <button type="button" class="btn btn-outline theme-btn" data-theme="dark" style="height: 36px; font-size: 0.75rem; padding: 0;" onclick="setTheme('dark')">
+              🌙 Koyu
+            </button>
+          </div>
+        </div>
+
+        <div class="card" style="padding: 12px 14px; margin-bottom: 4px; background: var(--bg-main);">
+          <strong style="font-size: 0.85rem; color: var(--text-main); display: block; margin-bottom: 4px;">Verileriniz Cihazınızda</strong>
           <p style="font-size: 0.75rem; color: var(--text-muted);">
-            Tüm kayıtlarınız telefonunuzun hafızasında (IndexedDB) saklanır. İnternetiniz olmasa bile çevrimdışı çalışır. Verilerinizi düzenli olarak yedeklemenizi öneririz.
+            Tüm kayıtlarınız iPhone hafızasında (IndexedDB) saklanır. Çevrimdışı çalışır. İçe aktarma öncesi otomatik emniyet snapshotu alınır.
           </p>
         </div>
 
         <!-- Yedek Dışa Aktarma -->
-        <button type="button" class="btn btn-outline" style="width: 100%; justify-content: flex-start; height: 48px; margin-bottom: 8px;" onclick="handleExportBackup()">
+        <button type="button" class="btn btn-outline" style="width: 100%; justify-content: flex-start; height: 48px;" onclick="handleExportBackup()">
           <script>document.write(icon('download', 18));</script>
-          <div style="text-align: left; margin-left: 6px;">
+          <div style="text-align: left; margin-left: 8px;">
             <strong style="display: block; font-size: 0.85rem;">Yedek Al (JSON / WhatsApp Paylaş)</strong>
             <span style="font-size: 0.7rem; color: var(--text-muted);">Dosyalarınıza kaydedin veya WhatsApp ile gönderin</span>
           </div>
         </button>
 
         <!-- Yedek İçe Aktarma -->
-        <label class="btn btn-outline" style="width: 100%; justify-content: flex-start; height: 48px; margin-bottom: 8px; cursor: pointer;">
+        <label class="btn btn-outline" style="width: 100%; justify-content: flex-start; height: 48px; cursor: pointer;">
           <script>document.write(icon('upload', 18));</script>
-          <div style="text-align: left; margin-left: 6px;">
+          <div style="text-align: left; margin-left: 8px;">
             <strong style="display: block; font-size: 0.85rem;">Yedek Dosyası Yükle (Geri Yükle)</strong>
-            <span style="font-size: 0.7rem; color: var(--text-muted);">Daha önce aldığınız .json yedeğini geri yükleyin</span>
+            <span style="font-size: 0.7rem; color: var(--text-muted);">Daha önce aldığınız .json yedeğini yükleyin</span>
           </div>
           <input type="file" accept=".json" style="display: none;" onchange="handleImportBackup(event)" />
         </label>
 
+        <!-- Son Emniyet Yedeğine Geri Dön -->
+        <button type="button" class="btn btn-outline" style="width: 100%; justify-content: flex-start; height: 44px;" onclick="handleRestoreSafetySnapshot()">
+          <script>document.write(icon('clock', 18));</script>
+          <div style="text-align: left; margin-left: 8px;">
+            <strong style="display: block; font-size: 0.85rem;">Son Emniyet Snapshotuna Geri Dön</strong>
+            <span style="font-size: 0.7rem; color: var(--text-muted);">Son yükleme/sıfırlama öncesi otomatik yedeği geri getirir</span>
+          </div>
+        </button>
+
         <!-- Örnek Veri Yükleme -->
-        <button type="button" class="btn btn-outline" style="width: 100%; justify-content: flex-start; height: 44px; margin-bottom: 16px;" onclick="handleSampleDataLoad()">
+        <button type="button" class="btn btn-outline" style="width: 100%; justify-content: flex-start; height: 44px;" onclick="handleSampleDataLoad()">
           <script>document.write(icon('plus-circle', 18));</script>
-          <div style="text-align: left; margin-left: 6px;">
+          <div style="text-align: left; margin-left: 8px;">
             <strong style="display: block; font-size: 0.85rem;">Örnek Veri Yükle</strong>
-            <span style="font-size: 0.7rem; color: var(--text-muted);">3 örnek müşteri ve deneme işlemleri yükler</span>
+            <span style="font-size: 0.7rem; color: var(--text-muted);">3 örnek müşteri ve deneme hareketleri ekler</span>
           </div>
         </button>
 
         <!-- Sıfırlama -->
-        <div style="border-top: 1px solid var(--border); padding-top: 12px;">
+        <div style="border-top: 1px solid var(--border); padding-top: 10px; margin-top: 4px;">
           <button type="button" class="btn btn-borc" style="width: 100%;" onclick="handleResetAllData()">
-            <script>document.write(icon('trash', 16));</script> Tüm Veritabanını Sıfırla
+            <script>document.write(icon('trash', 16));</script> Tüm Veritabanını Sıfırla (Onaylı)
           </button>
         </div>
       </div>

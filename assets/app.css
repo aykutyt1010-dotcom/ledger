@@ -1,7 +1,7 @@
 /**
  * Ledger — Mobil Öncelikli Ana Stil Dosyası (assets/app.css)
  * iPhone ve modern mobil cihazlar için optimize edilmiş, sıfır taşmalı,
- * yüksek kontrastlı, iOS Safe-Area destekli CSS mimarisi.
+ * yüksek kontrastlı, iOS Safe-Area ve Karanlık Mod (Dark Mode) destekli CSS mimarisi.
  */
 
 :root {
@@ -13,7 +13,7 @@
   --border: #E2E8F0;
   --border-focus: #94A3B8;
   
-  --text-main: #0F172A; /* Yüksek Kontrast Metin */
+  --text-main: #0F172A; /* Yüksek Kontrast Metin (WCAG AAA) */
   --text-muted: #64748B;
   --text-sub: #475569;
 
@@ -42,12 +42,60 @@
   --font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, sans-serif;
 }
 
+/* Karanlık Mod (Dark Mode) Desteği */
+[data-theme="dark"] {
+  --primary: #F8FAFC;
+  --primary-light: #E2E8F0;
+  --primary-accent: #3B82F6;
+  --bg-main: #090D16; /* Derin OLED Siyah */
+  --card-bg: #131A27;
+  --border: #232E42;
+  --border-focus: #475569;
+  --text-main: #F8FAFC;
+  --text-muted: #94A3B8;
+  --text-sub: #CBD5E1;
+  --borc-red: #F87171;
+  --borc-bg: #2B1417;
+  --borc-border: #7F1D1D;
+  --odeme-green: #4ADE80;
+  --odeme-bg: #0D261A;
+  --odeme-border: #14532D;
+  --shadow-bottom-bar: 0 -4px 16px rgba(0, 0, 0, 0.5);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --primary: #F8FAFC;
+    --primary-light: #E2E8F0;
+    --primary-accent: #3B82F6;
+    --bg-main: #090D16;
+    --card-bg: #131A27;
+    --border: #232E42;
+    --border-focus: #475569;
+    --text-main: #F8FAFC;
+    --text-muted: #94A3B8;
+    --text-sub: #CBD5E1;
+    --borc-red: #F87171;
+    --borc-bg: #2B1417;
+    --borc-border: #7F1D1D;
+    --odeme-green: #4ADE80;
+    --odeme-bg: #0D261A;
+    --odeme-border: #14532D;
+    --shadow-bottom-bar: 0 -4px 16px rgba(0, 0, 0, 0.5);
+  }
+}
+
 /* Temel Sıfırlama & iOS Taşma Koruması */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
   -webkit-tap-highlight-color: transparent;
+}
+
+/* WCAG 1.4.4 Uyumlu Dokunma Davranışı: 300ms gecikmeyi engeller */
+button, input, select, textarea, a, .chip, .quick-action-btn, .nav-tab {
+  touch-action: manipulation;
 }
 
 html {
@@ -117,6 +165,10 @@ body {
   box-shadow: 0 4px 10px rgba(15, 23, 42, 0.15);
 }
 
+[data-theme="dark"] .app-logo {
+  background: linear-gradient(135deg, #2563EB, #1D4ED8);
+}
+
 .app-titles h1 {
   font-size: 1.25rem;
   font-weight: 700;
@@ -168,10 +220,11 @@ body {
   align-items: center;
   justify-content: center;
   box-shadow: var(--shadow-sm);
+  cursor: pointer;
 }
 
 .btn-icon:hover {
-  background: #F1F5F9;
+  background: rgba(0,0,0,0.04);
   color: var(--text-main);
 }
 
@@ -179,6 +232,11 @@ body {
   background-color: var(--primary);
   color: #FFFFFF;
   box-shadow: 0 2px 8px rgba(30, 41, 59, 0.2);
+}
+
+[data-theme="dark"] .btn-primary {
+  background-color: var(--primary-accent);
+  color: #FFFFFF;
 }
 
 .btn-primary:active {
@@ -192,7 +250,7 @@ body {
 }
 
 .btn-borc:active {
-  background-color: #FEE2E2;
+  background-color: rgba(220, 38, 38, 0.15);
 }
 
 .btn-odeme {
@@ -202,7 +260,7 @@ body {
 }
 
 .btn-odeme:active {
-  background-color: #DCFCE7;
+  background-color: rgba(22, 163, 74, 0.15);
 }
 
 .btn-outline {
@@ -231,6 +289,11 @@ body {
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.2);
   position: relative;
   overflow: hidden;
+}
+
+[data-theme="dark"] .hero-card {
+  background: linear-gradient(145deg, #131A27, #0B111D);
+  border: 1px solid #232E42;
 }
 
 .hero-card::after {
@@ -460,6 +523,11 @@ body {
   border-color: var(--primary);
 }
 
+[data-theme="dark"] .chip.active {
+  background: var(--primary-accent);
+  border-color: var(--primary-accent);
+}
+
 /* Müşteri Kartı (iOS Liste Öğesi) */
 .customer-card {
   background: var(--card-bg);
@@ -514,7 +582,7 @@ body {
 }
 
 .avatar.sifir {
-  background: #F1F5F9;
+  background: rgba(148, 163, 184, 0.15);
   color: var(--text-muted);
 }
 
@@ -584,7 +652,7 @@ body {
   gap: 8px;
   margin-top: 12px;
   padding-top: 10px;
-  border-top: 1px solid #F1F5F9;
+  border-top: 1px solid var(--border);
 }
 
 .btn-mini-action {
@@ -598,7 +666,7 @@ body {
   justify-content: center;
   gap: 4px;
   border: 1px solid var(--border);
-  background: #F8FAFC;
+  background: var(--bg-main);
   cursor: pointer;
   transition: all 0.12s ease;
 }
@@ -624,7 +692,7 @@ body {
   height: 36px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
-  background: #F8FAFC;
+  background: var(--bg-main);
   color: var(--text-sub);
   display: inline-flex;
   align-items: center;
@@ -750,7 +818,7 @@ body {
   width: 56px;
   height: 56px;
   border-radius: 16px;
-  background: #F1F5F9;
+  background: rgba(148, 163, 184, 0.15);
   color: var(--text-muted);
   display: inline-flex;
   align-items: center;
@@ -785,6 +853,10 @@ body {
   box-shadow: var(--shadow-bottom-bar);
   z-index: 40;
   padding-bottom: max(env(safe-area-inset-bottom, 0px), 6px);
+}
+
+[data-theme="dark"] .bottom-nav {
+  background: rgba(19, 26, 39, 0.92);
 }
 
 .bottom-nav-inner {
@@ -870,7 +942,7 @@ body {
 }
 
 .bottom-sheet {
-  background: #FFFFFF;
+  background: var(--card-bg);
   width: 100%;
   max-width: 540px;
   border-top-left-radius: 24px;
@@ -893,6 +965,10 @@ body {
   background: #CBD5E1;
   border-radius: 2px;
   margin: 0 auto 16px auto;
+}
+
+[data-theme="dark"] .sheet-drag-handle {
+  background: #475569;
 }
 
 .modal-header {
@@ -925,7 +1001,7 @@ body {
   width: 100%;
   border-radius: var(--radius-md);
   border: 1px solid var(--border);
-  background: #F8FAFC;
+  background: var(--bg-main);
   padding: 12px 14px;
   font-size: 16px !important; /* iOS Otomatik Zoom'u Önler */
   color: var(--text-main);
@@ -936,7 +1012,7 @@ body {
 
 .form-input:focus, .form-select:focus, .form-textarea:focus {
   border-color: var(--primary-accent);
-  background: #FFFFFF;
+  background: var(--card-bg);
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
@@ -962,7 +1038,7 @@ body {
   padding-right: 16px;
   border-radius: var(--radius-md);
   border: 2px solid var(--border);
-  background: #FFFFFF;
+  background: var(--card-bg);
   font-size: 1.5rem !important;
   font-weight: 800;
   color: var(--text-main);
@@ -988,7 +1064,7 @@ body {
   padding: 6px 12px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
-  background: #F1F5F9;
+  background: var(--bg-main);
   font-size: 0.75rem;
   font-weight: 600;
   color: var(--text-sub);
@@ -996,17 +1072,18 @@ body {
 }
 
 .quick-amount-btn:active {
-  background: #E2E8F0;
+  background: var(--border);
 }
 
 /* Sekme Geçiş Anahtarı (Tab Switcher) */
 .type-toggle-switch {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  background: #F1F5F9;
+  background: var(--bg-main);
   padding: 4px;
   border-radius: var(--radius-md);
   margin-bottom: 16px;
+  border: 1px solid var(--border);
 }
 
 .type-toggle-btn {
@@ -1026,13 +1103,13 @@ body {
 }
 
 .type-toggle-btn.active.borc {
-  background: #FFFFFF;
+  background: var(--card-bg);
   color: var(--borc-red);
   box-shadow: var(--shadow-sm);
 }
 
 .type-toggle-btn.active.odeme {
-  background: #FFFFFF;
+  background: var(--card-bg);
   color: var(--odeme-green);
   box-shadow: var(--shadow-sm);
 }
@@ -1103,6 +1180,11 @@ body {
   background: linear-gradient(135deg, #1E293B, #0F172A);
   color: #FFFFFF;
   border-color: #1E293B;
+}
+
+[data-theme="dark"] .report-summary-box.highlight {
+  background: linear-gradient(135deg, #1E293B, #0F172A);
+  border-color: #232E42;
 }
 
 .report-summary-box p {

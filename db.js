@@ -162,6 +162,22 @@ function getInitials(name) {
     return (parts[0][0] + (parts[parts.length - 1][0] || '')).toLocaleUpperCase('tr-TR');
 }
 
+/**
+ * Telefon numarasını Türkiye standartlarına göre okunaklı formatlar
+ * "05321234567" -> "0532 123 45 67"
+ */
+function formatPhoneTR(phone) {
+    if (!phone) return '';
+    const digits = String(phone).replace(/\D/g, '');
+    if (digits.length === 10) {
+        return `0${digits.slice(0, 3)} ${digits.slice(3, 6)} ${digits.slice(6, 8)} ${digits.slice(8, 10)}`;
+    }
+    if (digits.length === 11 && digits.startsWith('0')) {
+        return `${digits.slice(0, 4)} ${digits.slice(4, 7)} ${digits.slice(7, 9)} ${digits.slice(9, 11)}`;
+    }
+    return phone;
+}
+
 // --- MÜŞTERİ (CARİ) İŞLEMLERİ --- //
 
 async function musteriEkle(ad, telefon = '', ilkBakiyeTL = 0) {
@@ -541,7 +557,7 @@ function hesaplaOdemeDurumu(sonOdemeTarihi, netBakiyeKurus, olusturmaTarihi) {
     }
 }
 
-// --- YEDEKLEME, İÇE/DIŞA AKTARMA (JSON) --- //
+// --- YEDEKLEME, İÇE/DIŞA AKTARMA VE GÜVENLİK SNAPSHOT'I --- //
 
 async function exportData() {
     const musteriler = await getMusteriler();
@@ -591,7 +607,35 @@ async function exportData() {
     return json;
 }
 
-async function importData(jsonData) {
+/**
+ * İçe aktarma öncesinde mevcut veritabanının otomatik emniyet yedeğini alır.
+ * Eğer içe aktarma sonrasında pişman olunursa veya dosya bozuksa tek tıkla geri dönülür!
+ */
+async function takeSafetySnapshot() {
+    try {
+        const musteriler = await getMusteriler();
+        const hareketler = await getHareketler();
+        const snapshot = {
+            tarih: new Date().toISOString(),
+            musteriler,
+            hareketler
+        };
+        localStorage.setItem('ledger_safety_snapshot', JSON.stringify(snapshot));
+        return true;
+    } catch (e) {
+        console.warn('Emniyet snapshotu alınamadı:', e);
+        return false;
+    }
+}
+
+async function restoreSafetySnapshot() {
+    const raw = localStorage.getItem('ledger_safety_snapshot');
+    if (!raw) throw new Error('Kayıtlı emniyet snapshotu bulunamadı.');
+    const data = JSON.parse(raw);
+    return importData(data, false); // Tekrar snapshot almadan geri yükle
+}
+
+async function importData(jsonData, takeSnapshot = true) {
     let parsed;
     try {
         parsed = typeof jsonData === 'string' ? JSON.parse(jsonData) : jsonData;
@@ -600,6 +644,11 @@ async function importData(jsonData) {
         }
     } catch (err) {
         throw new Error('Yedek dosyası okunamadı: ' + err.message);
+    }
+
+    // 1. Veri silinmeden önce emniyet yedeği al
+    if (takeSnapshot) {
+        await takeSafetySnapshot();
     }
 
     const db = await initDB();
@@ -620,6 +669,7 @@ async function importData(jsonData) {
 }
 
 async function tumVerileriTemizle() {
+    await takeSafetySnapshot(); // Temizlemeden önce de güvenlik snapshot'ı sakla!
     const db = await initDB();
     return new Promise((resolve, reject) => {
         const tx = db.transaction(['musteriler', 'hareketler'], 'readwrite');
